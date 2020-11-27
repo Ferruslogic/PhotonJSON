@@ -1,4 +1,6 @@
 # PhotonJSON
+[Reading in English](README.md)
+
 Biblioteca de LiveCode scripts para trabajar con JSON, escrito en livecode-script y sin el uso de externos.
 
 En esta biblioteca, convergen las ideas de muchos desarrolladores que crearon soluciones como esta en LiveCode y en otros lenguajes de programación. Aunque existen varias bibliotecas para trabajar con JSON en LiveCode. Nos planteamos un reto personal, crear nuestra propia versión para lo cual tomamos como base el gran trabajo realizado por Bob Hall en la librería FastJSON. Necesitábamos una biblioteca como FastJSON y con la velocidad del mergJSON de Mount Goulding. Así que empezamos a escribir PhotonJSON usando las ideas y el código de FastJSON como base, aunque en algunos casos reescribimos por completo los algoritmos.

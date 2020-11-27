@@ -1,4 +1,6 @@
 # PhotonJSON
+[Leer en Español](LEEME.md)
+
 LiveCode script library for working with JSON, written in livecode-script and without the use of external.
 
 In this library ideas converge from many developers who created solutions like this in LiveCode and in other programming languages. Although there are several libraries for working with JSON in LiveCode. We it a personal challenge to create our own version for which we took as a basis the great work done by Bob Hall in the FastJSON library. We needed a library like FastJSON and with the speed of Mount Goulding's mergJSON. So we started writing PhotonJSON using FastJSON's ideas and code as a base, although in some cases we completely rewrote the algorithms.
