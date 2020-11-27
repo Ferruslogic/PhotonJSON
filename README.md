@@ -45,7 +45,7 @@ PhotonJSON has 5 functions and a public property that is, they can be accessed f
 | validateJSON  | function | JSON string                                                  | Boolean     | Validate if a string is a valid JSON.                  |
 | beautifyJSON  | function | JSON string, numbers of spaces and whether it is treated as Unicode | JSON string | JSON string formatted in a more visually pleasing way. |
 | minifyJSON    | function | JSON string and if it is treated as Unicode                  | JSON string | Remove unnecessary spaces from JSON string.            |
-| JSONStringify | function | LC fix, if JSON is formatted nice and if it is treated as Unicode | JSON string | Gets the JSON string from an LC Array.                 |
+| JSONStringify | function | LC Array, if JSON is formatted nice and if it is treated as Unicode | JSON string | Gets the JSON string from an LC Array.                 |
 | JSONParser    | function | JSON string and if treated as Unicode                        | LC Array    | Gets the LC Array of a JSON string.                    |
 
 These are the four functions that are optionally included for PhotonJSON compatibility with projects that use mergeJSON or FastJSON. They expect the same parameters as in their original versions and in the same order.

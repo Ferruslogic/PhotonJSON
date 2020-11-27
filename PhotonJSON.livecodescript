@@ -111,6 +111,10 @@ function beautifyJSON pJsonString, pIndentSize, pAsUnicode
       put space after tIndent
    end repeat
 
+   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # so we replace them with "\u0022" and "\u005C" which we'll unescape
+   # with all the other unescapes when we parse
+   replace "\\" with "\u005C" in pJsonString
    replace (backSlash & quote) with "\u0022" in pJsonString
 
    repeat for each token tToken in pJsonString
@@ -214,30 +218,32 @@ function beautifyJSON pJsonString, pIndentSize, pAsUnicode
       end switch
 
 
-      put tToken into tPrevToken
-      if "\u0022" is in tToken then replace "\u0022"  with  quote in tToken
+      if "\" is in tToken then
+         if ("\" & quote) is in tToken then replace ("\" & quote) with quote in tToken
+         if "\u005C" is in tToken then replace "\u005C" with slash in tToken
+         if "\u0022" is in tToken then replace "\u0022" with quote in tToken
+         if "\n" is in tToken then replace "\n" with return in tToken
+         if "\r" is in tToken then replace "\n" with cr in tToken
+         if "\t" is in tToken then replace "\t" with tab in tToken
+         if "\\" is in tToken then replace "\\" with "\" in tToken
+         if "\/" is in tToken then replace "\/" with "/" in tToken
+         if "\r\n" is in tToken then replace "\r\n" with return in tToken
+         if "\f" is in tToken then replace "\f" with return in tToken
+         if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
+      end if
+
+      if pAsUnicode and tToken is not a ASCII String then
+            put _utf8encode(tToken) into tToken
+      end if
 
       if tType is 1 then
-         # any other value is processed as a string.
-         # JSON strings require that certain characters be 'escaped' with a backslash:
-         if "\"  is in tToken then replace "\" with "\\" in tToken // the backslash itself
-         if quote is in tToken then replace quote with "\" & quote in tToken // the double quote
-         if "/" is in tToken then replace "/" with "\/" in tToken // the (forward) slash
-         if tab is in tToken then replace tab with "\t" in tToken // the tab
-         if return is in tToken then replace return with "\n" in tToken // the return
-
-         if pAsUnicode and tToken is not a ASCII String then
-            put _utf8encode(tToken) into tToken
-         end if
-
-         put return & tCurrentIndent & quote & tToken & quote after tFormatted
+         put quote & tToken & quote after tFormatted
          put 1 into tGet -- get the key name
          next repeat
       end if
 
       put _jsonValue(tToken,false,pAsUnicode) after tFormatted
-      -- get the key value
-      add 1 to tGet
+      add 1 to tGet -- get the key value
    end repeat
 
    return tFormatted
@@ -249,11 +255,13 @@ end beautifyJSON
 # 2: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function minifyJSON pJsonString, pAsUnicode
-   local tFormatted, tType
+   local tFormatted, tType, tGet
 
+   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # so we replace them with "\u0022" and "\u005C" which we'll unescape
+   # with all the other unescapes when we parse
+   replace "\\" with "\u005C" in pJsonString
    replace (backSlash & quote) with "\u0022" in pJsonString
-
-   local tGet
 
    repeat for each token tToken in pJsonString
       switch tToken
@@ -300,21 +308,25 @@ function minifyJSON pJsonString, pAsUnicode
       end switch
 
 
-      if "\u0022" is in tToken then replace "\u0022"  with  quote in tToken
+      if "\" is in tToken then
+         if ("\" & quote) is in tToken then replace ("\" & quote) with quote in tToken
+         if "\u005C" is in tToken then replace "\u005C" with slash in tToken
+         if "\u0022" is in tToken then replace "\u0022" with quote in tToken
+         if "\n" is in tToken then replace "\n" with return in tToken
+         if "\r" is in tToken then replace "\n" with cr in tToken
+         if "\t" is in tToken then replace "\t" with tab in tToken
+         if "\\" is in tToken then replace "\\" with "\" in tToken
+         if "\/" is in tToken then replace "\/" with "/" in tToken
+         if "\r\n" is in tToken then replace "\r\n" with return in tToken
+         if "\f" is in tToken then replace "\f" with return in tToken
+         if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
+      end if
+
+      if pAsUnicode and tToken is not a ASCII String then
+            put _utf8encode(tToken) into tToken
+      end if
 
       if tType is 1 then
-         # any other value is processed as a string.
-         # JSON strings require that certain characters be 'escaped' with a backslash:
-         if "\"  is in tToken then replace "\" with "\\" in tToken // the backslash itself
-         if quote is in tToken then replace quote with "\" & quote in tToken // the double quote
-         if "/" is in tToken then replace "/" with "\/" in tToken // the (forward) slash
-         if tab is in tToken then replace tab with "\t" in tToken // the tab
-         if return is in tToken then replace return with "\n" in tToken // the return
-
-         if pAsUnicode and tToken is not a ASCII String then
-            put _utf8encode(tToken) into tToken
-         end if
-
          put quote & tToken & quote after tFormatted
          put 1 into tGet -- get the key name
          next repeat
@@ -447,6 +459,10 @@ function JSONParser pJsonString, pIsUnicode
       end if
    end if
 
+   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # so we replace them with "\u0022" and "\u005C" which we'll unescape
+   # with all the other unescapes when we parse
+   replace "\\" with "\u005C" in pJsonString
    replace (backSlash & quote) with "\u0022" in pJsonString
 
    repeat for each token tToken in pJsonString
@@ -506,6 +522,7 @@ function JSONParser pJsonString, pIsUnicode
 
       if "\" is in tToken then
          if ("\" & quote) is in tToken then replace ("\" & quote) with quote in tToken
+         if "\u005C" is in tToken then replace "\u005C" with slash in tToken
          if "\u0022" is in tToken then replace "\u0022" with quote in tToken
          if "\n" is in tToken then replace "\n" with return in tToken
          if "\r" is in tToken then replace "\n" with cr in tToken
