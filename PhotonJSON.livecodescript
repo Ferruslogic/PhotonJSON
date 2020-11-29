@@ -20,30 +20,30 @@ constant kVersion = "1.0.0", kSpaces = "    "
 
 # The current version of the library.
 getProp cVersion
-   return kVersion
+    return kVersion
 end cVersion
 
 -----------------------------------------------------------------------------
 --- These functions are for compatibility with projects that use mergJSON ---
 -----------------------------------------------------------------------------
 --function jsonToArray pJSON
---   return JSONParser(pJSON)
+--   return JSONParser(pJSON,true)
 --end jsonToArray
 
 
 --function arrayToJson pArray, pForceRootType, pPretty
---   return JSONStringify(pArray,pPretty)
+--   return JSONStringify(pArray,pPretty,true)
 --end arrayToJson
 
 -----------------------------------------------------------------------------
 --- These functions are for compatibility with projects that use FASTJSON ---
 -----------------------------------------------------------------------------
 --function arrayFromJson pJson
---   return JSONParser(pJSON)
+--   return JSONParser(pJSON,true)
 --end arrayFromJson
 
 --function jsonFromArray pArray, pForceRootType, pPretty
---   return JSONStringify(pArray,pPretty)
+--   return JSONStringify(pArray,pPretty,true)
 --end jsonFromArray
 
 -----------------------------------------------------------------------------
@@ -108,148 +108,148 @@ end validateJSON
 # 3: Whether it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function beautifyJSON pJsonString, pIndentSize, pAsUnicode
-   local tIndent, tPrevToken, tFormatted, tType, tCurrentIndent, tGet
+    local tIndent, tPrevToken, tFormatted, tType, tCurrentIndent, tGet
 
-   if pIndentSize is not a integer then put 4 into pIndentSize
+    if pIndentSize is not a integer then put 4 into pIndentSize
 
-   repeat for pIndentSize
-      put space after tIndent
-   end repeat
+    repeat for pIndentSize
+        put space after tIndent
+    end repeat
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
-   # so we replace them with "\u0022" and "\u005C" which we'll unescape
-   # with all the other unescapes when we parse
-   replace "\\" with "\u005C" in pJsonString
-   replace (backSlash & quote) with "\u0022" in pJsonString
+    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+    # so we replace them with "\u0022" and "\u005C" which we'll unescape
+    # with all the other unescapes when we parse
+    replace "\\" with "\u005C" in pJsonString
+    replace (backSlash & quote) with "\u0022" in pJsonString
 
-   repeat for each token tToken in pJsonString
-      switch tToken
+    repeat for each token tToken in pJsonString
+        switch tToken
 
-         case "{"
-            put 1 into tType
+            case "{"
+                put 1 into tType
 
-            if tPrevToken is comma then
-               put return & tCurrentIndent & "{" after tFormatted
-            else
-               put "{" after tFormatted
-            end if
+                if tPrevToken is comma then
+                    put return & tCurrentIndent & "{" after tFormatted
+                else
+                    put "{" after tFormatted
+                end if
 
-            put tIndent after tCurrentIndent
-            put tToken into tPrevToken
+                put tIndent after tCurrentIndent
+                put tToken into tPrevToken
 
-            next repeat
-            break
+                next repeat
+                break
 
-         case "["
-            put 0 into tType
+            case "["
+                put 0 into tType
 
-            if tPrevToken is in "[," then
-               put return & tCurrentIndent & "[" after tFormatted
-            else
-               put "[" after tFormatted
-            end if
+                if tPrevToken is in "[," then
+                    put return & tCurrentIndent & "[" after tFormatted
+                else
+                    put "[" after tFormatted
+                end if
 
-            put tIndent after tCurrentIndent
-            put tToken into tPrevToken
+                put tIndent after tCurrentIndent
+                put tToken into tPrevToken
 
-            next repeat
-            break
+                next repeat
+                break
 
-         case "}"
-            delete char - (pIndentSize) to - 1 of tCurrentIndent
-            put 1 into tType
+            case "}"
+                delete char - (pIndentSize) to - 1 of tCurrentIndent
+                put 1 into tType
 
-            if tPrevToken is "]" then
-               put tPrevToken & tToken into last token tFormatted
-            else
-               put return & tCurrentIndent & tToken after tFormatted
-            end if
-            put tToken into tPrevToken
+                if tPrevToken is "]" then
+                    put tPrevToken & tToken into last token tFormatted
+                else
+                    put return & tCurrentIndent & tToken after tFormatted
+                end if
+                put tToken into tPrevToken
 
-            next repeat
-            break
+                next repeat
+                break
 
-         case "]"
-            delete char - (pIndentSize) to - 1 of tCurrentIndent
-            put 1 into tType
+            case "]"
+                delete char - (pIndentSize) to - 1 of tCurrentIndent
+                put 1 into tType
 
-            if tToken is "]" and tPrevToken  is not in "]}" then
+                if tToken is "]" and tPrevToken  is not in "]}" then
 
-               put tToken after tFormatted
-               put empty into tPrevToken
+                    put tToken after tFormatted
+                    put empty into tPrevToken
 
-               next repeat
-            else
+                    next repeat
+                else
 
-               put return & tCurrentIndent & tToken after tFormatted
-            end if
+                    put return & tCurrentIndent & tToken after tFormatted
+                end if
 
-            put tToken into tPrevToken
+                put tToken into tPrevToken
 
-            next repeat
-            break
+                next repeat
+                break
 
-         case "-"
-            put tToken into tPrevToken
-            put "-" after tFormatted
+            case "-"
+                put tToken into tPrevToken
+                put "-" after tFormatted
 
-            next repeat
-            break
+                next repeat
+                break
 
-         case ":"
-            put tToken into tPrevToken
-            put ": " after tFormatted
-            put 0 into tType
-            next repeat
-            break
+            case ":"
+                put tToken into tPrevToken
+                put ": " after tFormatted
+                put 0 into tType
+                next repeat
+                break
 
-         case ","
-            if tPrevToken is in "]}" then
-               put comma  after tFormatted
-               put tToken into tPrevToken
-               next repeat
-            end if
+            case ","
+                if tPrevToken is in "]}" then
+                    put comma  after tFormatted
+                    put tToken into tPrevToken
+                    next repeat
+                end if
 
-            if tGet is 2 and tPrevToken is not  "}" then
-               put comma & return & tCurrentIndent  after tFormatted
-               put 0 into tGet
-            else
-               put comma & space after tFormatted
-            end if
+                if tGet is 2 and tPrevToken is not  "}" then
+                    put comma & return & tCurrentIndent  after tFormatted
+                    put 0 into tGet
+                else
+                    put comma & space after tFormatted
+                end if
 
-            put tToken into tPrevToken
-            next repeat
-            break
-      end switch
+                put tToken into tPrevToken
+                next repeat
+                break
+        end switch
 
 
-      if "\" is in tToken then
-         if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
-         if "\u0022" is in tToken then replace "\u0022" with quote in tToken
-         if "\n" is in tToken then replace "\n" with return in tToken
-         if "\r" is in tToken then replace "\n" with cr in tToken
-         if "\t" is in tToken then replace "\t" with tab in tToken
-         if "\/" is in tToken then replace "\/" with "/" in tToken
-         if "\r\n" is in tToken then replace "\r\n" with return in tToken
-         if "\f" is in tToken then replace "\f" with return in tToken
-         if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
-      end if
+        if "\" is in tToken then
+            if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
+            if "\u0022" is in tToken then replace "\u0022" with quote in tToken
+            if "\n" is in tToken then replace "\n" with return in tToken
+            if "\r" is in tToken then replace "\n" with cr in tToken
+            if "\t" is in tToken then replace "\t" with tab in tToken
+            if "\/" is in tToken then replace "\/" with "/" in tToken
+            if "\r\n" is in tToken then replace "\r\n" with return in tToken
+            if "\f" is in tToken then replace "\f" with return in tToken
+            if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
+        end if
 
-      if pAsUnicode then
+        if pAsUnicode then
             put _utf8encode(tToken) into tToken
-      end if
+        end if
 
-      if tType is 1 then
-         put quote & tToken & quote after tFormatted
-         put 1 into tGet -- get the key name
-         next repeat
-      end if
+        if tType is 1 then
+            put quote & tToken & quote after tFormatted
+            put 1 into tGet -- get the key name
+            next repeat
+        end if
 
-      put _jsonValue(tToken,false,pAsUnicode) after tFormatted
-      add 1 to tGet -- get the key value
-   end repeat
+        put _jsonValue(tToken,false,pAsUnicode) after tFormatted
+        add 1 to tGet -- get the key value
+    end repeat
 
-   return tFormatted
+    return tFormatted
 end beautifyJSON
 
 # minifyJSON: Remove unnecessary spaces from JSON string.
@@ -258,86 +258,86 @@ end beautifyJSON
 # 2: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function minifyJSON pJsonString, pAsUnicode
-   local tFormatted, tType, tGet
+    local tFormatted, tType, tGet
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
-   # so we replace them with "\u0022" and "\u005C" which we'll unescape
-   # with all the other unescapes when we parse
-   replace "\\" with "\u005C" in pJsonString
-   replace (backSlash & quote) with "\u0022" in pJsonString
+    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+    # so we replace them with "\u0022" and "\u005C" which we'll unescape
+    # with all the other unescapes when we parse
+    replace "\\" with "\u005C" in pJsonString
+    replace (backSlash & quote) with "\u0022" in pJsonString
 
-   repeat for each token tToken in pJsonString
-      switch tToken
+    repeat for each token tToken in pJsonString
+        switch tToken
 
-         case "{"
-            put 1 into tType
-            put "{" after tFormatted
-            next repeat
-            break
+            case "{"
+                put 1 into tType
+                put "{" after tFormatted
+                next repeat
+                break
 
-         case "["
-            put 0 into tType
-            put "[" after tFormatted
-            next repeat
-            break
+            case "["
+                put 0 into tType
+                put "[" after tFormatted
+                next repeat
+                break
 
-         case "}"
-            put 1 into tType
-            put tToken after tFormatted
-            next repeat
+            case "}"
+                put 1 into tType
+                put tToken after tFormatted
+                next repeat
 
-            break
-         case "]"
-            put 1 into tType
-            put tToken after tFormatted
-            next repeat
-            break
+                break
+            case "]"
+                put 1 into tType
+                put tToken after tFormatted
+                next repeat
+                break
 
-         case "-"
-            put "-" after tFormatted
-            next repeat
-            break
+            case "-"
+                put "-" after tFormatted
+                next repeat
+                break
 
-         case ":"
-            put ":" after tFormatted
-            put 0 into tType
-            next repeat
-            break
+            case ":"
+                put ":" after tFormatted
+                put 0 into tType
+                next repeat
+                break
 
-         case ","
-            put comma  after tFormatted
-            next repeat
-            break
-      end switch
+            case ","
+                put comma  after tFormatted
+                next repeat
+                break
+        end switch
 
 
-      if "\" is in tToken then
-         if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
-         if "\u0022" is in tToken then replace "\u0022" with quote in tToken
-         if "\n" is in tToken then replace "\n" with return in tToken
-         if "\r" is in tToken then replace "\n" with cr in tToken
-         if "\t" is in tToken then replace "\t" with tab in tToken
-         if "\/" is in tToken then replace "\/" with "/" in tToken
-         if "\r\n" is in tToken then replace "\r\n" with return in tToken
-         if "\f" is in tToken then replace "\f" with return in tToken
-         if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
-      end if
+        if "\" is in tToken then
+            if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
+            if "\u0022" is in tToken then replace "\u0022" with quote in tToken
+            if "\n" is in tToken then replace "\n" with return in tToken
+            if "\r" is in tToken then replace "\n" with cr in tToken
+            if "\t" is in tToken then replace "\t" with tab in tToken
+            if "\/" is in tToken then replace "\/" with "/" in tToken
+            if "\r\n" is in tToken then replace "\r\n" with return in tToken
+            if "\f" is in tToken then replace "\f" with return in tToken
+            if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
+        end if
 
-      if pAsUnicode and tToken is not a ASCII String then
+        if pAsUnicode and tToken is not a ASCII String then
             put _utf8encode(tToken) into tToken
-      end if
+        end if
 
-      if tType is 1 then
-         put quote & tToken & quote after tFormatted
-         put 1 into tGet -- get the key name
-         next repeat
-      end if
+        if tType is 1 then
+            put quote & tToken & quote after tFormatted
+            put 1 into tGet -- get the key name
+            next repeat
+        end if
 
-      put _jsonValue(tToken,false,pAsUnicode) after tFormatted
-      add 1 to tGet -- get the key value
-   end repeat
+        put _jsonValue(tToken,false,pAsUnicode) after tFormatted
+        add 1 to tGet -- get the key value
+    end repeat
 
-   return tFormatted
+    return tFormatted
 end minifyJSON
 
 # JSONStringify: Gets the JSON string from an LC Array.
@@ -347,93 +347,14 @@ end minifyJSON
 # 3: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function JSONStringify pArray, pPretty, pAsUnicode
-    local tJSON, tKeyValue, tOldSpace, tKeys
 
     if pArray is not an array then return empty -- "Parser Error: parameter given is not an array."
 
     if pPretty is not true then
-
-        if _isNumericalArray(pArray)  then
-            put "[" into tJSON
-
-            repeat for each element tValue in pArray
-                put _jsonValue(tValue, false, pAsUnicode) & comma after tJSON
-            end repeat
-
-            put "]" into the last char of tJSON
-        else
-            # the array's keys are not all numerical, so the root element will be a JSON *object*
-            put "{" into tJSON
-
-            repeat for each key tKey in pArray
-                put quote & tKey & quote & ":" & _jsonValue(pArray[tKey], false, pAsUnicode) & comma after tJSON
-            end repeat
-
-            put "}" into the last char of tJSON
-        end if
-
+        return _builderJSON(pArray, pAsUnicode)
     else
-
-        put kSpaces after sSpace
-
-        if _isNumericalArray(pArray) then
-            put "[" into tJSON
-
-            put _jsonValue(pArray[1], pPretty, pAsUnicode) into tKeyValue
-
-            delete variable pArray[1]
-
-            if tKeyValue ends with "}" then
-                if pArray is empty then
-
-                    put sSpace into tOldSpace
-                    delete char - 4 to - 1 of sSpace
-
-                    replace tOldSpace with sSpace in tKeyValue
-
-                    put tKeyValue &"]" after tJSON
-                    return tJSON
-                else
-                    put tKeyValue & "," & return after tJSON
-                end if
-            else
-                put tKeyValue & "," after tJSON
-            end if
-
-            repeat for each element tValue in pArray
-                put _jsonValue(tValue, pPretty, pAsUnicode) into tKeyValue
-
-                if tKeyValue ends with "}" then
-                    put sSpace & tKeyValue & "," & return after tJSON
-                else
-                    put space & tKeyValue & "," after tJSON
-                end if
-
-            end repeat
-
-            delete char - 4 to - 1 of sSpace
-
-            if tKeyValue ends with "}" then
-                put return & sSpace & "]" into char - 2 to - 1 of tJSON
-            else
-                put  "]" into char - 1 of tJSON
-            end if
-
-        else
-
-            put "{" & return into tJSON
-
-            repeat for each key tKey in pArray
-                put sSpace & quote & tKey & quote & ": " & _jsonValue( pArray[tKey] , true, pAsUnicode) & "," & return  after tJSON
-            end repeat
-
-            delete char - 4 to - 1 of sSpace
-
-            put return & sSpace & "}" into char - 2 to - 1 of tJSON
-        end if
+        return _builderJsonPretty(pArray, pAsUnicode)
     end if
-
-    return tJSON
 end JSONStringify
 
 
@@ -446,13 +367,16 @@ function JSONParser pJsonString, pAsUnicode
     local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
 
     if pJsonString is empty then return empty
-    if _jsonToUtf8( pJsonString ) is true then return pJsonString
+
+    if _jsonToUtf8(pJsonString ) is true then
+        return pJsonString
+    end if
 
     # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
     # so we replace them with "\u0022" and "\u005C" which we'll unescape
     # with all the other unescapes when we parse
     replace "\\" with "\u005C" in pJsonString
-    replace "\" & quote with "\u0022" in pJsonString
+    replace (backSlash & quote) with "\u0022" in pJsonString
 
     repeat for each token tToken in pJsonString
 
@@ -509,7 +433,7 @@ function JSONParser pJsonString, pAsUnicode
 
         end switch
 
-        if "\" is in tToken then
+        if backslash is in tToken then
             if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
             if "\u0022" is in tToken then replace "\u0022" with quote in tToken
             if "\n" is in tToken then replace "\n" with return in tToken
@@ -518,12 +442,12 @@ function JSONParser pJsonString, pAsUnicode
             if "\/" is in tToken then replace "\/" with "/" in tToken
             if "\r\n" is in tToken then replace "\r\n" with return in tToken
             if "\f" is in tToken then replace "\f" with return in tToken
-            if "\u" is in tToken then put _unicodeEscapes( tToken ) into tToken
+            if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
         end if
 
 
         if pAsUnicode then
-            put _utf8decode( tToken ) into tToken
+            put _utf8decode(tToken) into tToken
         end if
 
         if tKeyNameOrValue = 1 then
@@ -535,14 +459,14 @@ function JSONParser pJsonString, pAsUnicode
                 put false into tHyphenMinus
             end if
 
-            _arrayBilder tToken, tArrayKeysPath, tResultArray, tNumKeys
-            next repeat
+
+
+            _builderArray tToken, tArrayKeysPath, tResultArray, tNumKeys
 
         else if tKeyNameOrValue = 0 then
 
             add 1 to tNumKeys
             put tToken into tArrayKeysPath[tNumKeys]
-            next repeat
 
         end if
     end repeat
@@ -550,78 +474,159 @@ function JSONParser pJsonString, pAsUnicode
     return tResultArray
 end JSONParser
 
-
-private command _arrayBilder @pValue, @pListKeys, @pArray, @pNumKeys
-   local tArray
-
-   switch pNumKeys
-      case 0
-         break
-
-      case 1
-         put pValue into pArray[pListKeys[1]]
-         break
-
-      case 2
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ]
-         break
-
-      case 3
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ]
-         break
-
-      case 4
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ]
-         break
-
-      case 5
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ]
-         break
-
-      case 6
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ]
-         break
-
-      case 7
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ]
-         break
-
-      case 8
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ]
-         break
-
-      case 9
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ][ pListKeys[9] ]
-         break
-
-      case 10
-         put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ][ pListKeys[9] ][ pListKeys[10] ]
-         break
-
-      default
-
-         repeat with x = 1 to pNumKeys
-            put empty into tArray
-            put pValue into tArray[pListKeys[x]]
-            put tArray into pValue
-         end repeat
-
-         union pArray with tArray recursively
-         break
-
-   end switch
-
-end _arrayBilder
-
-
-private function _isNumericalArray @pArray
-    local tKeys
+private function  _builderJson pArray, pAsUnicode
+    local tJSON, tKeys
 
     put the keys of pArray into tKeys
-    replace return with empty in tKeys
+    filter tKeys without "[0-9]*"
 
-    return (tKeys is a integer)
-end _isNumericalArray
+    if tKeys is empty then
+        # the array's keys are all *numerical*, so the root element will be a JSON *array*
+        put "[" into tJSON
+        repeat for each element tValue in pArray
+            put _jsonValue(tValue, pAsUnicode) & comma after tJSON
+        end repeat
+        put "]" into the last char of tJSON
+    else
+        # the array's keys are not all numerical, so the root element will be a JSON *object*
+        put "{" into tJSON
+        repeat for each key tKey in pArray
+            put quote & tKey & quote & ":" & _jsonValue(pArray[tKey], pAsUnicode) & comma after tJSON
+        end repeat
+        put "}" into the last char of tJSON
+    end if
+
+    return tJSON
+end _builderJSON
+
+private function _builderJsonPretty pArray, pAsUnicode
+    local tJSON, tValue, tKey, tIsNumericalArray, tKeyValue, tOldSpace, tKeys
+
+    put the keys of pArray into tKeys
+    filter tKeys without "[0-9]*"
+
+    put kSpaces after sSpace
+
+    if tKeys is empty then
+        put "[" into tJSON
+
+        put _jsonValue(pArray[1], pAsUnicode) into tKeyValue
+
+        delete variable pArray[1]
+
+        if tKeyValue ends with "}" then
+            if pArray is empty then
+
+                put sSpace into tOldSpace
+                delete char - 4 to - 1 of sSpace
+
+                replace tOldSpace with sSpace in tKeyValue
+
+                put tKeyValue &"]" after tJSON
+                return tJSON
+            else
+                put tKeyValue & "," & return after tJSON
+            end if
+        else
+            put tKeyValue & "," after tJSON
+        end if
+
+        repeat for each element tValue in pArray
+            put _jsonValuePretty(tValue, pAsUnicode) into tKeyValue
+
+            if tKeyValue ends with "}" then
+                put sSpace & tKeyValue & "," & return after tJSON
+            else
+                put space & tKeyValue & "," after tJSON
+            end if
+
+        end repeat
+
+        delete char - 4 to - 1 of sSpace
+
+        if tKeyValue ends with "}" then
+            put return & sSpace & "]" into char - 2 to - 1 of tJSON
+        else
+            put  "]" into char - 1 of tJSON
+        end if
+
+    else
+
+        put "{" & return into tJSON
+
+        repeat for each key tKey in pArray
+            put sSpace & quote & tKey & quote & ": " & _jsonValuePretty( pArray[tKey] , true, pAsUnicode) & "," & return  after tJSON
+        end repeat
+
+        delete char - 4 to - 1 of sSpace
+
+        put return & sSpace & "}" into char - 2 to - 1 of tJSON
+    end if
+
+end _builderJsonPretty
+
+private command _builderArray @pValue, @pListKeys, @pArray, @pNumKeys
+    local tArray
+
+    switch pNumKeys
+        case 0
+            break
+
+        case 1
+            put pValue into pArray[pListKeys[1]]
+            break
+
+        case 2
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ]
+            break
+
+        case 3
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ]
+            break
+
+        case 4
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ]
+            break
+
+        case 5
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ]
+            break
+
+        case 6
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ]
+            break
+
+        case 7
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ]
+            break
+
+        case 8
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ]
+            break
+
+        case 9
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ][ pListKeys[9] ]
+            break
+
+        case 10
+            put pValue into pArray[ pListKeys[1] ][ pListKeys[2] ][ pListKeys[3] ][ pListKeys[4] ][ pListKeys[5] ][ pListKeys[6] ][ pListKeys[7] ][ pListKeys[8] ][ pListKeys[9] ][ pListKeys[10] ]
+            break
+
+        default
+
+            repeat with x = 1 to pNumKeys
+                put empty into tArray
+                put pValue into tArray[pListKeys[x]]
+                put tArray into pValue
+            end repeat
+
+            union pArray with tArray recursively
+            break
+
+    end switch
+
+end _builderArray
+
 
 private function _jsonToUtf8 @pJson
     local tNulls = "1111"
@@ -675,11 +680,12 @@ private function _jsonToUtf8 @pJson
 
 end _jsonToUtf8
 
-private function _jsonValue @pValue, pPretty, @pAsUnicode
+
+private function _jsonValue @pValue, @pAsUnicode
     switch
         case pValue is an array
             # this allows us to have nested JSON objects and arrays:
-            return JSONStringify(pValue, pPretty, pAsUnicode)
+            return _builderJSON(pValue, pAsUnicode)
             break
 
         case pValue is empty
@@ -700,7 +706,7 @@ private function _jsonValue @pValue, pPretty, @pAsUnicode
                 # need to catch when a "number" starts with a 0
                 # decided to return this as a quoted string
                 # JSON lint throws an exception if a number starts with a 0
-                if the char 1 of pValue is not 0 or pValue is 0 then
+                if the first char of pValue is not 0 or pValue is 0 then
                     return pValue
                 else
                     return quote & pValue & quote
@@ -709,6 +715,7 @@ private function _jsonValue @pValue, pPretty, @pAsUnicode
             else
                 return quote & pValue & quote
             end if
+
             break
 
         default
@@ -729,6 +736,60 @@ private function _jsonValue @pValue, pPretty, @pAsUnicode
 end _jsonValue
 
 
+private function _jsonValuePretty  @pValue, @pAsUnicode
+
+    switch
+        case pValue is an array
+            # this allows us to have nested JSON objects and arrays:
+            return _builderJsonPretty(pValue, pAsUnicode)
+            break
+
+        case pValue is empty
+            return "null"
+            break
+
+        case pValue is a boolean
+            return pValue
+            break
+
+        case pValue is a number
+            # in the case that it is a constant. Infinity, pi ...
+            if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
+
+                # negative numbers or 0.N
+                if pValue < 1 and pValue then return pValue
+
+                # need to catch when a "number" starts with a 0
+                # decided to return this as a quoted string
+                # JSON lint throws an exception if a number starts with a 0
+                if the first char of pValue is not 0 or pValue is 0 then
+                    return pValue
+                else
+                    return quote & pValue & quote
+                end if
+
+            else
+                return quote & pValue & quote
+            end if
+
+            break
+
+        default
+            # any other value is processed as a string.
+            # JSON strings require that certain characters be 'escaped' with a backslash:
+            if "\"  is in pValue then replace "\" with "\\" in pValue // the backslash itself
+            if quote is in pValue then replace quote with "\" & quote in pValue // the double quote
+            if "/" is in pValue then replace "/" with "\/" in pValue // the (forward) slash
+            if tab is in pValue then replace tab with "\t" in pValue // the tab
+            if return is in pValue then replace return with "\n" in pValue // the return
+
+            if pAsUnicode then
+                return quote & _utf8encode(pValue) & quote
+            else
+                return quote & pValue & quote
+            end if
+    end switch
+end _jsonValuePretty
 
 private function _swapEndianness pString, pSize
    local tNString
@@ -806,3 +867,4 @@ private function _unicodeEscapes pString
     put tBuffer after tNString
     return tNString
 end _unicodeEscapes
+
