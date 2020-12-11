@@ -12,7 +12,7 @@ In this library ideas converge from many developers who created solutions like t
 In PhotonJSON, a certain degree of optimization was achieved in the processes of analyzing a JSON. Therefore, the library has a performance very close to that obtained in mergJSON. Not forgetting that the latter makes use of an external that processes at a lower level than LiveCode and therefore is a little faster. These are some of the improvements we found in PhotonJSON.
 1. Convert a JSON to an LC Array in a less time equal to or very close to that of mergJSON.
 2. When converting an LC Array to JSON you can specify whether the JSON is beautifully formatted.
-3. Added a nice formatting function and another to minify existing JSONs.
+3. Added a nice formatting function and another to minify existing JSON.
 
 
 
