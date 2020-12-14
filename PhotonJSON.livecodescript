@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.0.0
+#  Version: v1.0.3
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
