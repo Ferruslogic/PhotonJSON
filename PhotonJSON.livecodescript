@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.0.0
+#  Version: v1.0.4
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -17,7 +17,7 @@ local sSpace  = ""
 local sIndentSize = 4
 
 # declare constants
-constant kVersion = "1.0.3", kSpaces = "    "
+constant kVersion = "1.0.4", kSpaces = "    "
 
 # The current version of the library.
 getProp cVersion
