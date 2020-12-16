@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.0.3
+#  Version: v1.0.0
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -109,16 +109,16 @@ end validateJSON
 # 3: Whether it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function beautifyJSON pJsonString, pIndentSize, pAsUnicode
-    local tArray
+   local tArray
 
-    if pIndentSize is a integer then put pIndentSize into sIndentSize
-    else put 4 into sIndentSize
+   if pIndentSize is a integer then put pIndentSize into sIndentSize
+   else put 4 into sIndentSize
 
-    put JSONParser(pJsonString, pAsUnicode) into tArray
+   put JSONParser(pJsonString, pAsUnicode) into tArray
 
-    if tArray is an array then
-        return JSONStringify(tArray, true, pAsUnicode)
-    end if
+   if tArray is an array then
+      return JSONStringify(tArray, true, pAsUnicode)
+   end if
 end beautifyJSON
 
 # minifyJSON: Remove unnecessary spaces from JSON string.
@@ -127,13 +127,13 @@ end beautifyJSON
 # 2: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function minifyJSON pJsonString, pAsUnicode
-    local tArray
+   local tArray
 
-    put JSONParser(pJsonString, pAsUnicode) into tArray
+   put JSONParser(pJsonString, pAsUnicode) into tArray
 
-    if tArray is an array then
-        return JSONStringify(tArray, false, pAsUnicode)
-    end if
+   if tArray is an array then
+      return JSONStringify(tArray, false, pAsUnicode)
+   end if
 end minifyJSON
 
 # JSONStringify: Gets the JSON string from an LC Array.
@@ -143,14 +143,16 @@ end minifyJSON
 # 3: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function JSONStringify pArray, pPretty, pAsUnicode
+   local tJson
+   if pArray is not an array then return empty -- "Parser Error: parameter given is not an array."
 
-    if pArray is not an array then return empty -- "Parser Error: parameter given is not an array."
+   if pPretty is not true then
+      put _builderJSON(pArray, pAsUnicode) into tJson
+   else
+      put _builderJsonPretty(pArray, pAsUnicode) into tJson
+   end if
 
-    if pPretty is not true then
-        return _builderJSON(pArray, pAsUnicode)
-    else
-        return _builderJsonPretty(pArray, pAsUnicode)
-    end if
+   return tJson
 end JSONStringify
 
 
@@ -160,141 +162,144 @@ end JSONStringify
 # 2: if it is treated as Unicode (Boolean)
 # returns: LC Array (Array)
 function JSONParser pJsonString, pAsUnicode
-    local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
+   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
 
-    if pJsonString is empty then return empty
+   if pJsonString is empty then return empty
 
-    if _jsonToUtf8(pJsonString ) is true then
-        return pJsonString
-    end if
+   if _jsonToUtf8(pJsonString ) is true then
+      return pJsonString
+   end if
 
-    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
-    # so we replace them with "\u0022" and "\u005C" which we'll unescape
-    # with all the other unescapes when we parse
-    replace "\\" with "\u005C" in pJsonString
-    replace (backSlash & quote) with "\u0022" in pJsonString
+   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # so we replace them with "\u0022" and "\u005C" which we'll unescape
+   # with all the other unescapes when we parse
+   replace "\\" with "\u005C" in pJsonString
+   replace (backSlash & quote) with "\u0022" in pJsonString
 
-    repeat for each token tToken in pJsonString
+   repeat for each token tToken in pJsonString
 
-        switch tToken
+      switch tToken
 
-            case "{"
-                put 0 into tKeyNameOrValue
-                next repeat
-                break
+         case "{"
+            put 0 into tKeyNameOrValue
+            next repeat
+            break
 
-            case "["
-                put 1 into tKeyNameOrValue
-                add 1 to tNumKeys
-                put 1 into tArrayKeysPath[tNumKeys]
-                put tNumKeys into tOpenJArray[tNumKeys]
-                next repeat
-                break
-
-            case "}"
-                delete variable tArrayKeysPath[tNumKeys]
-                subtract 1 from tNumKeys
-                next repeat
-                break
-
-            case comma
-                if tOpenJArray[tNumKeys] <> empty then
-                    add 1 to tArrayKeysPath[tNumKeys]
-                    put 1 into tKeyNameOrValue
-                else
-                    delete variable tArrayKeysPath[tNumKeys]
-                    subtract 1 from tNumKeys
-                    put 0 into tKeyNameOrValue
-                end if
-                next repeat
-                break
-
-            case colon
-                put 1 into tKeyNameOrValue
-                next repeat
-                break
-
-            case "]"
-                delete variable tArrayKeysPath[tNumKeys]
-                delete variable tOpenJArray[tNumKeys]
-                subtract 1 from tNumKeys
-                put 0 into tKeyNameOrValue
-                next repeat
-                break
-
-            case "-"
-                put true into tHyphenMinus
-                next repeat
-                break
-
-        end switch
-
-        if backslash is in tToken then
-            if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
-            if "\u0022" is in tToken then replace "\u0022" with quote in tToken
-            if "\n" is in tToken then replace "\n" with return in tToken
-            if "\r" is in tToken then replace "\n" with cr in tToken
-            if "\t" is in tToken then replace "\t" with tab in tToken
-            if "\/" is in tToken then replace "\/" with "/" in tToken
-            if "\r\n" is in tToken then replace "\r\n" with return in tToken
-            if "\f" is in tToken then replace "\f" with return in tToken
-            if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
-        end if
-
-
-        if pAsUnicode then
-            put _utf8decode(tToken) into tToken
-        end if
-
-        if tKeyNameOrValue = 1 then
-
-            if "null" is tToken then
-                put empty into tToken
-            else if tHyphenMinus then
-                put "-" & tToken into tToken
-                put false into tHyphenMinus
-            end if
-
-
-
-            _builderArray tToken, tArrayKeysPath, tResultArray, tNumKeys
-
-        else if tKeyNameOrValue = 0 then
-
+         case "["
+            put 1 into tKeyNameOrValue
             add 1 to tNumKeys
-            put tToken into tArrayKeysPath[tNumKeys]
+            put 1 into tArrayKeysPath[tNumKeys]
+            put tNumKeys into tOpenJArray[tNumKeys]
+            next repeat
+            break
 
-        end if
-    end repeat
+         case "}"
+            delete variable tArrayKeysPath[tNumKeys]
+            subtract 1 from tNumKeys
+            next repeat
+            break
 
-    return tResultArray
+         case comma
+            if tOpenJArray[tNumKeys] <> empty then
+               add 1 to tArrayKeysPath[tNumKeys]
+               put 1 into tKeyNameOrValue
+            else
+               delete variable tArrayKeysPath[tNumKeys]
+               subtract 1 from tNumKeys
+               put 0 into tKeyNameOrValue
+            end if
+            next repeat
+            break
+
+         case colon
+            put 1 into tKeyNameOrValue
+            next repeat
+            break
+
+         case "]"
+            delete variable tArrayKeysPath[tNumKeys]
+            delete variable tOpenJArray[tNumKeys]
+            subtract 1 from tNumKeys
+            put 0 into tKeyNameOrValue
+            next repeat
+            break
+
+         case "-"
+            put true into tHyphenMinus
+            next repeat
+            break
+
+      end switch
+
+      if backslash is in tToken then
+         if "\n" is in tToken then replace "\n" with numToChar(10) in tToken
+         if "\r" is in tToken then replace "\r" with numToChar(13) in tToken
+         if "\t" is in tToken then replace "\t" with numToChar(9) in tToken
+         if "\/" is in tToken then replace "\/" with "/" in tToken
+         if "\f" is in tToken then replace "\f" with numToChar(12) in tToken
+         if "\b" is in tToken then replace "\b" with numToChar(8) in tToken
+
+         if "\u0022" is in tToken then replace "\u0022" with quote in tToken
+         if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
+
+         if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
+      end if
+
+
+      if pAsUnicode then
+         put _utf8decode(tToken) into tToken
+      end if
+
+      if tKeyNameOrValue = 1 then
+
+         if "null" is tToken then
+            put empty into tToken
+         else if tHyphenMinus then
+            put "-" & tToken into tToken
+            put false into tHyphenMinus
+         end if
+
+
+
+         _builderArray tToken, tArrayKeysPath, tResultArray, tNumKeys
+
+      else if tKeyNameOrValue = 0 then
+
+         add 1 to tNumKeys
+         put tToken into tArrayKeysPath[tNumKeys]
+
+      end if
+   end repeat
+
+   return tResultArray
 end JSONParser
 
 private function  _builderJson pArray, pAsUnicode
-    local tJSON, tKeys
+   local tJSON, tKeys
 
-    put the keys of pArray into tKeys
-    filter tKeys without "[0-9]*"
+   put the keys of pArray into tKeys
+   filter tKeys without "[0-9]*"
 
-    if tKeys is empty then
-        # the array's keys are all *numerical*, so the root element will be a JSON *array*
-        put "[" into tJSON
-        
-        repeat for each element tValue in pArray
-            put _jsonValue(tValue, pAsUnicode) & comma after tJSON
-        end repeat
-        put "]" into the last char of tJSON
-    else
-        # the array's keys are not all numerical, so the root element will be a JSON *object*
-        put "{" into tJSON
-        repeat for each key tKey in pArray
+   if tKeys is empty then
+      # the array's keys are all *numerical*, so the root element will be a JSON *array*
+      put "[" into tJSON
+      repeat for each element tValue in pArray
+         put _jsonValue(tValue, pAsUnicode) & comma after tJSON
+      end repeat
+      put "]" into the last char of tJSON
+   else
+      # the array's keys are not all numerical, so the root element will be a JSON *object*
+      put "{" into tJSON
 
-            put quote & _jsonString( tKey ) & quote & ":" & _jsonValue(pArray[tKey], pAsUnicode) & comma after tJSON
-        end repeat
-        put "}" into the last char of tJSON
-    end if
+      repeat for each key tKey in pArray
 
-    return tJSON
+         put quote & _jsonString( tKey ) & quote & ":" & _jsonValue(pArray[tKey], pAsUnicode) & comma after tJSON
+      end repeat
+
+      put "}" into the last char of tJSON
+   end if
+
+   return tJSON
 end _builderJSON
 
 private function _builderJsonPretty pArray, pAsUnicode
@@ -491,155 +496,172 @@ end _jsonToUtf8
 
 private function _jsonValue @pValue, @pAsUnicode
     switch
-        case pValue is an array
-            # this allows us to have nested JSON objects and arrays:
-            return _builderJSON(pValue, pAsUnicode)
-            break
+    case pValue is an array
+        # this allows us to have nested JSON objects and arrays:
+        return _builderJSON(pValue, pAsUnicode)
+        break
 
-        case pValue is empty
-            return "null"
-            break
+    case pValue is empty
+        return "null"
+        break
 
-        case pValue is a boolean
-            return pValue
-            break
+    case pValue is a boolean
+        return pValue
+        break
 
-        case pValue is a number
-            # in the case that it is a constant. Infinity, pi ...
-            if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
+    case pValue is a number
+        # in the case that it is a constant. Infinity, pi ...
+        if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
 
-                # negative numbers or 0.N
-                if pValue < 1 and pValue then return pValue
+            # negative numbers or 0.N
+            if pValue < 1 and pValue then return pValue
 
-                # need to catch when a "number" starts with a 0
-                # decided to return this as a quoted string
-                # JSON lint throws an exception if a number starts with a 0
-                if the first char of pValue is not 0 or pValue is 0 then
-                    return pValue
-                else
-                    return quote & pValue & quote
-                end if
-
+            # need to catch when a "number" starts with a 0
+            # decided to return this as a quoted string
+            # JSON lint throws an exception if a number starts with a 0
+            if the first char of pValue is not 0 or pValue is 0 then
+                return pValue
             else
                 return quote & pValue & quote
             end if
 
-            break
+        else
+            return quote & pValue & quote
+        end if
 
-        default
-            # any other value is processed as a string.
-            # JSON strings require that certain characters be 'escaped' with a backslash:
-            if "\"  is in pValue then replace "\" with "\\" in pValue // the backslash itself
-            if quote is in pValue then replace quote with "\" & quote in pValue // the double quote
-            if "/" is in pValue then replace "/" with "\/" in pValue // the (forward) slash
-            if tab is in pValue then replace tab with "\t" in pValue // the tab
-            if return is in pValue then replace return with "\n" in pValue // the return
+        break
 
-            if pAsUnicode then
-                return quote & _utf8encode(pValue) & quote
-            else
-                return quote & pValue & quote
-            end if
+    default
+        # any other value is processed as a string.
+        # JSON strings require that certain characters be 'escaped' with a backslash:
+        if "\" is in pValue then replace "\" with "\\" in pValue
+        if quote is in pValue then replace quote with "\" & quote in pValue
+        if "/" is in pValue then replace "/" with "\/" in pValue
+        if numToChar(8) is in pValue then replace numToChar(8) with "\b" in pValue
+        if numToChar(9) is in pValue then replace numToChar(9) with "\t" in pValue
+        if numToChar(10) is in pValue then replace numToChar(10) with "\n" in pValue
+        if numToChar(12) is in pValue then replace numToChar(12) with "\f" in pValue
+        if numToChar(13) is in pValue then replace numToChar(13) with "\r" in pValue
+
+        if pAsUnicode then
+            return quote & _utf8encode(pValue) & quote
+        else
+            return quote & pValue & quote
+        end if
     end switch
 end _jsonValue
 
 
 private function _jsonString pValue
-   if "\"  is in pValue then replace "\" with "\\" in pValue // the backslash itself
-   if quote is in pValue then replace quote with "\" & quote in pValue // the double quote
-   if "/" is in pValue then replace "/" with "\/" in pValue // the (forward) slash
-   if tab is in pValue then replace tab with "\t" in pValue // the tab
-   if return is in pValue then replace return with "\n" in pValue // the return
+    # In a JSON object, the names of its keys are strings.
+    # So these characters escape in case they are there.
 
-   return pValue
+    # https://www.json.org/img/string.png
+    # any other value is processed as a string.
+    # JSON strings require that certain characters be 'escaped' with a backslash:
+    # This makes the processing a bit slower. But it is necessary for it to comply with the ECMA-404 standard
+    if "\" is in pValue then replace "\" with "\\" in pValue
+    if quote is in pValue then replace quote with "\" & quote in pValue
+    if "/" is in pValue then replace "/" with "\/" in pValue
+    if numToChar(8) is in pValue then replace numToChar(8) with "\b" in pValue
+    if numToChar(9) is in pValue then replace numToChar(9) with "\t" in pValue
+    if numToChar(10) is in pValue then replace numToChar(10) with "\n" in pValue
+    if numToChar(12) is in pValue then replace numToChar(12) with "\f" in pValue
+    if numToChar(13) is in pValue then replace numToChar(13) with "\r" in pValue
+
+    return pValue
 end _jsonString
 
 private function _jsonValuePretty  @pValue, @pAsUnicode
 
     switch
-        case pValue is an array
-            # this allows us to have nested JSON objects and arrays:
-            return _builderJsonPretty(pValue, pAsUnicode)
-            break
+    case pValue is an array
+        # this allows us to have nested JSON objects and arrays:
+        return _builderJsonPretty(pValue, pAsUnicode)
+        break
 
-        case pValue is empty
-            return "null"
-            break
+    case pValue is empty
+        return "null"
+        break
 
-        case pValue is a boolean
-            return pValue
-            break
+    case pValue is a boolean
+        return pValue
+        break
 
-        case pValue is a number
-            # in the case that it is a constant. Infinity, pi ...
-            if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
+    case pValue is a number
+        # in the case that it is a constant. Infinity, pi ...
+        if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
 
-                # negative numbers or 0.N
-                if pValue < 1 and pValue then return pValue
+            # negative numbers or 0.N
+            if pValue < 1 and pValue then return pValue
 
-                # need to catch when a "number" starts with a 0
-                # decided to return this as a quoted string
-                # JSON lint throws an exception if a number starts with a 0
-                if the first char of pValue is not 0 or pValue is 0 then
-                    return pValue
-                else
-                    return quote & pValue & quote
-                end if
-
+            # need to catch when a "number" starts with a 0
+            # decided to return this as a quoted string
+            # JSON lint throws an exception if a number starts with a 0
+            if the first char of pValue is not 0 or pValue is 0 then
+                return pValue
             else
                 return quote & pValue & quote
             end if
 
-            break
+        else
+            return quote & pValue & quote
+        end if
 
-        default
-            # any other value is processed as a string.
-            # JSON strings require that certain characters be 'escaped' with a backslash:
-            if "\"  is in pValue then replace "\" with "\\" in pValue // the backslash itself
-            if quote is in pValue then replace quote with "\" & quote in pValue // the double quote
-            if "/" is in pValue then replace "/" with "\/" in pValue // the (forward) slash
-            if tab is in pValue then replace tab with "\t" in pValue // the tab
-            if return is in pValue then replace return with "\n" in pValue // the return
+        break
 
-            if pAsUnicode then
-                return quote & _utf8encode(pValue) & quote
-            else
-                return quote & pValue & quote
-            end if
+    default
+        # any other value is processed as a string.
+        # JSON strings require that certain characters be 'escaped' with a backslash:
+        if "\" is in pValue then replace "\" with "\\" in pValue
+        if quote is in pValue then replace quote with "\" & quote in pValue
+        if "/" is in pValue then replace "/" with "\/" in pValue
+        if numToChar(8) is in pValue then replace numToChar(8) with "\b" in pValue
+        if numToChar(9) is in pValue then replace numToChar(9) with "\t" in pValue
+        if numToChar(10) is in pValue then replace numToChar(10) with "\n" in pValue
+        if numToChar(12) is in pValue then replace numToChar(12) with "\f" in pValue
+        if numToChar(13) is in pValue then replace numToChar(13) with "\r" in pValue
+
+
+        if pAsUnicode then
+            return quote & _utf8encode(pValue) & quote
+        else
+            return quote & pValue & quote
+        end if
     end switch
 end _jsonValuePretty
 
 private function _swapEndianness pString, pSize
-   local tNString
+    local tNString
 
-   put empty into tNString
+    put empty into tNString
 
-   if pSize is empty then put 2 into pSize
+    if pSize is empty then put 2 into pSize
 
-   repeat with n = 1 to length(pString) step pSize
-      repeat with s = pSize - 1 down to 0
-         put byte n + s of pString  after tNString
-      end repeat
-   end repeat
+    repeat with n = 1 to length(pString) step pSize
+        repeat with s = pSize - 1 down to 0
+            put byte n + s of pString  after tNString
+        end repeat
+    end repeat
 
-   return tNString
+    return tNString
 end _swapEndianness
 
 
 private function _utf8encode pString, pIsUnicode
-   if pIsUnicode then
-      return unidecode(pString, "UTF8")
-   else
-      return unidecode(uniencode(pString),"UTF8")
-   end if
+    if pIsUnicode then
+        return unidecode(pString, "UTF8")
+    else
+        return unidecode(uniencode(pString),"UTF8")
+    end if
 end _utf8encode
 
 private function _utf8decode pString, pToUnicode
     if pToUnicode then
         return uniencode(pString,"UTF8")
     else
-      return unidecode(uniencode(pString,"UTF8"))
-   end if
+        return unidecode(uniencode(pString,"UTF8"))
+    end if
 end _utf8decode
 
 -------------------------------
@@ -667,9 +689,9 @@ private function _unicodeEscapes pString
 
                 -- TO DEAL WITH DIACRITICS :
                 if platform() is "MacOS" then
-                    put isotomac(numtochar(baseconvert(char 3 to 6 of tBuffer, 16, 10))) into tBuffer
+                    put isotomac(numToChar(baseconvert(char 3 to 6 of tBuffer, 16, 10))) into tBuffer
                 else
-                    put numtochar(baseconvert(char 3 to 6 of tBuffer, 16, 10)) into tBuffer
+                    put numToChar(baseconvert(char 3 to 6 of tBuffer, 16, 10)) into tBuffer
                 end if
 
                 put false into tInEsc
@@ -685,4 +707,3 @@ private function _unicodeEscapes pString
     put tBuffer after tNString
     return tNString
 end _unicodeEscapes
-
