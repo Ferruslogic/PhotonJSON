@@ -21,7 +21,7 @@ constant kVersion = "1.0.4", kSpaces = "    "
 
 # The current version of the library.
 getProp cVersion
-    return kVersion
+   return kVersion
 end cVersion
 
 -----------------------------------------------------------------------------
@@ -55,50 +55,50 @@ end cVersion
 # Parameter: The JSON to evaluate. (String)
 # returns: A boolean. (Boolean)
 function validateJSON pJsonString
-    local tCont = 0, tTokenCont = 0, tSplit
+   local tCont = 0, tTokenCont = 0, tSplit
 
-    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
-    # so we replace them with "\u0022" and "\u005C" which we'll unescape
-    # with all the other unescapes when we parse
-    replace "\\" with "\u005C" in pJsonString
-    replace (backSlash & quote) with "\u0022" in pJsonString
+   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # so we replace them with "\u0022" and "\u005C" which we'll unescape
+   # with all the other unescapes when we parse
+   replace "\\" with "\u005C" in pJsonString
+   replace (backSlash & quote) with "\u0022" in pJsonString
 
-    repeat for each token tToken in pJsonString
-        add 1 to tTokenCont
+   repeat for each token tToken in pJsonString
+      add 1 to tTokenCont
 
-        switch tToken
+      switch tToken
 
-            case "{"
-            case "["
-                add 1 to tCont
-                break
+         case "{"
+         case "["
+            add 1 to tCont
+            break
 
-            case "}"
-            case "]"
-                subtract 1 from tCont
-                break
+         case "}"
+         case "]"
+            subtract 1 from tCont
+            break
 
-            case "+"
-                put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
-                split tSplit by quote
-                if tSplit[2] is not "+" then
-                    return false
-                end if
-                break
-        end switch
-
-        if tToken begins with "0" then
+         case "+"
             put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
-
             split tSplit by quote
-
-            if tSplit[2] is not tToken then
-                return false
+            if tSplit[2] is not "+" then
+               return false
             end if
-        end if
-    end repeat
+            break
+      end switch
 
-    return tCont is 0
+      if tToken begins with "0" then
+         put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
+
+         split tSplit by quote
+
+         if tSplit[2] is not tToken then
+            return false
+         end if
+      end if
+   end repeat
+
+   return tCont is 0
 end validateJSON
 
 
@@ -273,6 +273,19 @@ function JSONParser pJsonString, pAsUnicode
 
    return tResultArray
 end JSONParser
+
+command setIndentSize pNum
+   if pNum is a integer and pNum > 0 then
+      put pNum into sIndentSize
+
+   else
+      put 0 into sIndentSize
+   end if
+end setIndentSize
+
+function getIndentSize
+   return sIndentSize
+end getIndentSize
 
 private function  _builderJson pArray, pAsUnicode
    local tJSON, tKeys
