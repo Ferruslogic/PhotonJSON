@@ -143,16 +143,18 @@ end minifyJSON
 # 3: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function JSONStringify pArray, pPretty, pAsUnicode
-   local tJson
-   if pArray is not an array then return empty -- "Parser Error: parameter given is not an array."
+    local tJson
+    if pArray is not an array then return empty -- "Parser Error: parameter given is not an array."
 
-   if pPretty is not true then
-      put _builderJSON(pArray, pAsUnicode) into tJson
-   else
-      put _builderJsonPretty(pArray, pAsUnicode) into tJson
-   end if
+    if pPretty is not true then
+        put _builderJSON(pArray, pAsUnicode) into tJson
+    else
+        put _builderJsonPretty(pArray, pAsUnicode) into tJson
+    end if
 
-   return tJson
+    delete variable sSpace
+
+    return tJson
 end JSONStringify
 
 
@@ -288,107 +290,112 @@ function getIndentSize
 end getIndentSize
 
 private function  _builderJson pArray, pAsUnicode
-   local tJSON, tKeys
+    local tJSON, tKeys
 
-   put the keys of pArray into tKeys
-   filter tKeys without "[0-9]*"
+    put the keys of pArray into tKeys
+    filter tKeys without "[0-9]*"
 
-   if tKeys is empty then
-      # the array's keys are all *numerical*, so the root element will be a JSON *array*
-      put "[" into tJSON
-      repeat for each element tValue in pArray
-         put _jsonValue(tValue, pAsUnicode) & comma after tJSON
-      end repeat
-      put "]" into the last char of tJSON
-   else
-      # the array's keys are not all numerical, so the root element will be a JSON *object*
-      put "{" into tJSON
+    if tKeys is empty then
+        # the array's keys are all *numerical*, so the root element will be a JSON *array*
+        put "[" into tJSON
+        repeat for each element tValue in pArray
+            put _jsonValue(tValue, pAsUnicode) & comma after tJSON
+        end repeat
+        put "]" into the last char of tJSON
+    else
+        put the keys of pArray into tKeys
+        sort lines of tKeys ascending international
+        # the array's keys are not all numerical, so the root element will be a JSON *object*
+        put "{" into tJSON
 
-      repeat for each key tKey in pArray
+        repeat for each line tKey in tKeys
 
-         put quote & _jsonString( tKey ) & quote & ":" & _jsonValue(pArray[tKey], pAsUnicode) & comma after tJSON
-      end repeat
+            put quote & _jsonString( tKey ) & quote & ":" & _jsonValue(pArray[tKey], pAsUnicode) & comma after tJSON
+        end repeat
 
-      put "}" into the last char of tJSON
-   end if
+        put "}" into the last char of tJSON
+    end if
 
-   return tJSON
+    return tJSON
 end _builderJSON
 
 private function _builderJsonPretty pArray, pAsUnicode
-   local tJSON, tValue, tKey, tIsNumericalArray, tKeyValue, tOldSpace, tKeys
+    local tJSON, tValue, tKey, tIsNumericalArray, tKeyValue, tOldSpace, tKeys
 
-   put the keys of pArray into tKeys
-   filter tKeys without "[0-9]*"
+    put the keys of pArray into tKeys
+    filter tKeys without "[0-9]*"
 
-   if sIndentSize is 4 or sIndentSize is not a integer then
-      put kSpaces after sSpace
+    if sIndentSize is 4 or sIndentSize is not a integer then
+        put kSpaces after sSpace
 
-   else if sIndentSize is a integer then
+    else if sIndentSize is a integer then
 
-      repeat for sIndentSize
-         put space after sSpace
-      end repeat
+        repeat for sIndentSize
+            put space after sSpace
+        end repeat
 
-   end if
+    end if
 
-   if tKeys is empty then
-      put "[" into tJSON
+    if tKeys is empty then
+        put "[" into tJSON
 
-      put _jsonValuePretty(pArray[1], pAsUnicode) into tKeyValue
+        put _jsonValuePretty(pArray[1], pAsUnicode) into tKeyValue
 
-      delete variable pArray[1]
+        delete variable pArray[1]
 
-      if tKeyValue ends with "}" then
-         if pArray is empty then
+        if tKeyValue ends with "}" then
+            if pArray is empty then
 
-            put sSpace into tOldSpace
-            delete char - sIndentSize to - 1 of sSpace
+                put sSpace into tOldSpace
+                delete char - sIndentSize to - 1 of sSpace
 
-            replace tOldSpace with sSpace in tKeyValue
+                replace tOldSpace with sSpace in tKeyValue
 
-            put tKeyValue & "]" after tJSON
-            return tJSON
-         else
-            put tKeyValue & "," & return after tJSON
-         end if
-      else
-         put tKeyValue & "," after tJSON
-      end if
+                put tKeyValue & "]" after tJSON
+                return tJSON
+            else
+                put tKeyValue & "," & return after tJSON
+            end if
+        else
+            put tKeyValue & "," after tJSON
+        end if
 
-      repeat for each element tValue in pArray
-         put _jsonValuePretty(tValue, pAsUnicode) into tKeyValue
+        repeat for each element tValue in pArray
+            put _jsonValuePretty(tValue, pAsUnicode) into tKeyValue
 
-         if tKeyValue ends with "}" then
-            put sSpace & tKeyValue & "," & return after tJSON
-         else
-            put space & tKeyValue & "," after tJSON
-         end if
+            if tKeyValue ends with "}" then
+                put sSpace & tKeyValue & "," & return after tJSON
+            else
+                put space & tKeyValue & "," after tJSON
+            end if
 
-      end repeat
+        end repeat
 
-      delete char - sIndentSize to - 1 of sSpace
+        delete char - sIndentSize to - 1 of sSpace
 
-      if tKeyValue ends with "}" then
-         put return & sSpace & "]" into char - 2 to - 1 of tJSON
-      else
-         put  "]" into char - 1 of tJSON
-      end if
+        if tKeyValue ends with "}" then
+            put return & sSpace & "]" into char - 2 to - 1 of tJSON
+        else
+            put  "]" into char - 1 of tJSON
+        end if
 
-   else
+    else
 
-      put "{" & return into tJSON
+        put the keys of pArray into tKeys
+        sort lines of tKeys ascending international
 
-      repeat for each key tKey in pArray
-         put sSpace & quote & _jsonString( tKey ) & quote & ": " & _jsonValuePretty( pArray[tKey] , pAsUnicode) & "," & return  after tJSON
-      end repeat
+        put "{" & return into tJSON
 
-      delete char - sIndentSize to - 1 of sSpace
+        repeat for each lines tKey in tKeys
+            put sSpace & quote & _jsonString( tKey ) & quote & ": " & _jsonValuePretty( pArray[tKey] , pAsUnicode) & "," & return  after tJSON
+        end repeat
 
-      put return & sSpace & "}" into char - 2 to - 1 of tJSON
-   end if
+        delete char - sIndentSize to - 1 of sSpace
 
-   return tJSON
+        put return & sSpace & "}" into char - 2 to - 1 of tJSON
+    end if
+
+    return tJSON
 end _builderJsonPretty
 
 private command _builderArray @pValue, @pListKeys, @pArray, @pNumKeys
