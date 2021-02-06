@@ -21,20 +21,20 @@ constant kVersion = "1.0.4", kSpaces = "    "
 
 # The current version of the library.
 getProp cVersion
-   return kVersion
+    return kVersion
 end cVersion
 
 -----------------------------------------------------------------------------
 --- These functions are for compatibility with projects that use mergJSON ---
 -----------------------------------------------------------------------------
---function jsonToArray pJSON
---    return JSONParser(pJSON,true) for value
---end jsonToArray
+function jsonToArray pJSON
+    return JSONParser(pJSON,true) for value
+end jsonToArray
 
 
---function arrayToJson pArray, pForceRootType, pPretty
---  return JSONStringify(pArray,pPretty,true)  for value
---end arrayToJson
+function arrayToJson pArray, pForceRootType, pPretty
+    return JSONStringify(pArray,pPretty,true)  for value
+end arrayToJson
 
 -----------------------------------------------------------------------------
 --- These functions are for compatibility with projects that use FASTJSON ---
@@ -44,7 +44,7 @@ function arrayFromJson pJson
 end arrayFromJson
 
 function jsonFromArray pArray, pForceRootType, pPretty
-  return JSONStringify(pArray,pPretty,true)  for value
+    return JSONStringify(pArray,pPretty,true)  for value
 end jsonFromArray
 
 -----------------------------------------------------------------------------
@@ -55,50 +55,50 @@ end jsonFromArray
 # Parameter: The JSON to evaluate. (String)
 # returns: A boolean. (Boolean)
 function validateJSON pJsonString
-   local tCont = 0, tTokenCont = 0, tSplit
+    local tCont = 0, tTokenCont = 0, tSplit
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
-   # so we replace them with "\u0022" and "\u005C" which we'll unescape
-   # with all the other unescapes when we parse
-   replace "\\" with "\u005C" in pJsonString
-   replace (backSlash & quote) with "\u0022" in pJsonString
+    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+    # so we replace them with "\u0022" and "\u005C" which we'll unescape
+    # with all the other unescapes when we parse
+    replace "\\" with "\u005C" in pJsonString
+    replace (backSlash & quote) with "\u0022" in pJsonString
 
-   repeat for each token tToken in pJsonString
-      add 1 to tTokenCont
+    repeat for each token tToken in pJsonString
+        add 1 to tTokenCont
 
-      switch tToken
+        switch tToken
 
-         case "{"
-         case "["
+        case "{"
+        case "["
             add 1 to tCont
             break
 
-         case "}"
-         case "]"
+        case "}"
+        case "]"
             subtract 1 from tCont
             break
 
-         case "+"
+        case "+"
             put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
             split tSplit by quote
             if tSplit[2] is not "+" then
-               return false  for value
+                return false  for value
             end if
             break
-      end switch
+        end switch
 
-      if tToken begins with "0" then
-         put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
+        if tToken begins with "0" then
+            put the token (tTokenCont - 1) to (tTokenCont + 1) of pJsonString into tSplit
 
-         split tSplit by quote
+            split tSplit by quote
 
-         if tSplit[2] is not tToken then
-            return false  for value
-         end if
-      end if
-   end repeat
+            if tSplit[2] is not tToken then
+                return false  for value
+            end if
+        end if
+    end repeat
 
-   return (tCont is 0 ) for value
+    return (tCont is 0 ) for value
 end validateJSON
 
 
@@ -109,16 +109,16 @@ end validateJSON
 # 3: Whether it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function beautifyJSON pJsonString, pIndentSize, pAsUnicode
-   local tArray
+    local tArray
 
-   if pIndentSize is a integer then put pIndentSize into sIndentSize
-   else put 4 into sIndentSize
+    if pIndentSize is a integer then put pIndentSize into sIndentSize
+    else put 4 into sIndentSize
 
-   put JSONParser(pJsonString, pAsUnicode) into tArray
+    put JSONParser(pJsonString, pAsUnicode) into tArray
 
-   if tArray is an array then
-      return JSONStringify(tArray, true, pAsUnicode)  for value
-   end if
+    if tArray is an array then
+        return JSONStringify(tArray, true, pAsUnicode)  for value
+    end if
 end beautifyJSON
 
 # minifyJSON: Remove unnecessary spaces from JSON string.
@@ -127,13 +127,13 @@ end beautifyJSON
 # 2: if it is treated as Unicode (Boolean)
 # returns: JSON string (String)
 function minifyJSON pJsonString, pAsUnicode
-   local tArray
+    local tArray
 
-   put JSONParser(pJsonString, pAsUnicode) into tArray
+    put JSONParser(pJsonString, pAsUnicode) into tArray
 
-   if tArray is an array then
-      return JSONStringify(tArray, false, pAsUnicode) for value
-   end if
+    if tArray is an array then
+        return JSONStringify(tArray, false, pAsUnicode) for value
+    end if
 end minifyJSON
 
 # JSONStringify: Gets the JSON string from an LC Array.
@@ -176,7 +176,10 @@ function JSONParser pJsonString, pAsUnicode
     replace "\\" with "\u005C" in pJsonString
     replace (backSlash & quote) with "\u0022" in pJsonString
 
-    local tOldToken, tObjEmpty = ""
+    local tOldToken, tObjEmpty = "", tCaseSensitive
+
+    put the caseSensitive into tCaseSensitive
+    set the caseSensitive to true
 
     repeat for each token tToken in pJsonString
 
@@ -282,20 +285,21 @@ function JSONParser pJsonString, pAsUnicode
         end if
     end repeat
 
+    set the caseSensitive to tCaseSensitive
+
     return tResultArray  for value
 end JSONParser
 
 command setIndentSize pNum
-   if pNum is a integer and pNum > 0 then
-      put pNum into sIndentSize
-
-   else
-      put 0 into sIndentSize
-   end if
+    if pNum is a integer and pNum > 0 then
+        put pNum into sIndentSize
+    else
+        put 0 into sIndentSize
+    end if
 end setIndentSize
 
 function getIndentSize
-   return sIndentSize  for value
+    return sIndentSize  for value
 end getIndentSize
 
 private function  _builderJson pArray, pAsUnicode
@@ -408,7 +412,12 @@ private function _builderJsonPretty pArray, pAsUnicode
 end _builderJsonPretty
 
 private command _builderArray @pValue, @pListKeys, @pArray, @pNumKeys
-    local tArray
+    local tArray, tCaseSensitive
+
+    # Adding caseSensitive  when creating key names, to avoid overwriting keys such as the following:
+    # A100 = "aasd", a100 = 33
+    put the caseSensitive into tCaseSensitive
+    set the caseSensitive to true
 
     switch pNumKeys
         case 0
@@ -466,6 +475,8 @@ private command _builderArray @pValue, @pListKeys, @pArray, @pNumKeys
             break
 
     end switch
+
+    set the caseSensitive to tCaseSensitive
 
 end _builderArray
 
@@ -736,4 +747,3 @@ private function _unicodeEscapes pString
     put tBuffer after tNString
     return tNString for value
 end _unicodeEscapes
-
