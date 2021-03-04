@@ -111,7 +111,7 @@ end validateJSON
 function beautifyJSON pJsonString, pIndentSize, pAsUnicode
     local tArray
 
-    if pIndentSize is a integer then put pIndentSize into sIndentSize
+    if pIndentSize is an integer then put pIndentSize into sIndentSize
     else put 4 into sIndentSize
 
     put JSONParser(pJsonString, pAsUnicode) into tArray
@@ -213,7 +213,7 @@ function JSONParser pJsonString, pAsUnicode
 
             case comma
                 if tOpenJArray[tNumKeys] <> empty then
-                    if tArrayKeysPath[tNumKeys] is a integer then
+                    if tArrayKeysPath[tNumKeys] is an integer then
                         add 1 to tArrayKeysPath[tNumKeys]
                         put 1 into tKeyNameOrValue
                     end if
@@ -291,7 +291,7 @@ function JSONParser pJsonString, pAsUnicode
 end JSONParser
 
 command setIndentSize pNum
-    if pNum is a integer and pNum > 0 then
+    if pNum is an integer and pNum > 0 then
         put pNum into sIndentSize
     else
         put 0 into sIndentSize
@@ -341,7 +341,7 @@ private function _builderJsonPretty pArray, pAsUnicode
     if sIndentSize is 4 or sIndentSize is not a integer then
         put kSpaces after sSpace
 
-    else if sIndentSize is a integer then
+    else if sIndentSize is an integer then
 
         repeat for sIndentSize
             put space after sSpace
@@ -549,26 +549,8 @@ private function _jsonValue @pValue, @pAsUnicode
         return pValue for value
         break
 
-    case pValue is a number
-        # in the case that it is a constant. Infinity, pi ...
-        if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
-
-            # negative numbers or 0.N
-            if pValue < 1 and pValue then return pValue for value
-
-            # need to catch when a "number" starts with a 0
-            # decided to return this as a quoted string
-            # JSON lint throws an exception if a number starts with a 0
-            if the first char of pValue is not 0 or pValue is 0 then
-                return pValue for value
-            else
-                return quote & pValue & quote for value
-            end if
-
-        else
-            return quote & pValue & quote for value
-        end if
-
+    case _isNumericValue( pValue )
+        return pValue for value
         break
 
     default
@@ -612,6 +594,32 @@ private function _jsonString pValue
     return pValue for value
 end _jsonString
 
+// Is ECMA-404 Numeric Value
+private function _isNumericValue pValue
+    local tFirstChar
+    put char 1 of pValue into tFirstChar
+    if tFirstChar is 0 and char 2 of pValue is not "."  or tFirstChar is not in "-0123456789"
+    then return false
+
+    # Scientific notifications
+    if "e" is in pValue then
+        set the itemdel to "e"
+        if the number of items of pValue is 2 and char 1 of pValue is not  in".e" and char -1 of pValue is not  in".e" then
+            if char 1 of item 2 of pValue is in "+-" then
+                delete char 1 of item 2 of pValue
+            end if
+            put the item 1 of pValue & the item 2 of pValue into pValue
+        else
+            return false
+        end if
+    end if
+
+    split pValue by "."
+    if the number of elements of pValue > 2 then return false
+    if pValue[ 2 ] is empty then  return pValue[ 1 ] is an integer
+    return pValue[ 1 ] is an integer and pValue[ 2 ] is an integer
+end _isNumericValue
+
 private function _jsonValuePretty  @pValue, @pAsUnicode
 
     switch
@@ -628,26 +636,8 @@ private function _jsonValuePretty  @pValue, @pAsUnicode
         return pValue for value
         break
 
-    case pValue is a number
-        # in the case that it is a constant. Infinity, pi ...
-        if pValue is not in "pi,eight,five,four,infinity,nine,one,scrollbarFactor,seven,six,ten,three,two,zero" then
-
-            # negative numbers or 0.N
-            if pValue < 1 and pValue then return pValue for value
-
-            # need to catch when a "number" starts with a 0
-            # decided to return this as a quoted string
-            # JSON lint throws an exception if a number starts with a 0
-            if the first char of pValue is not 0 or pValue is 0 then
-                return pValue for value
-            else
-                return quote & pValue & quote for value
-            end if
-
-        else
-            return quote & pValue & quote for value
-        end if
-
+    case _isNumericValue( pValue )
+        return pValue for value
         break
 
     default
