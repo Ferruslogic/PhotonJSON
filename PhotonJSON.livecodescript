@@ -394,7 +394,7 @@ function JSONParser pJsonString
     return tResultArray
 end JSONParser
 
-private function _JsonString @pValue
+private function _JsonString pValue
     if pValue is not an ascii string then put _utf8encode(pValue) into pValue
 
     # So these characters escape in case they are there.
@@ -409,7 +409,7 @@ private function _JsonString @pValue
 end _JsonString
 
 
-private function  _JsonValue @pValue
+private function  _JsonValue pValue
     switch pValue
         case "true"
             return "true"
@@ -698,4 +698,3 @@ private function _JsonPrettyCompact  pJsonString, pIndentSize, pForceRootType
     return  textDecode( tFormatted, "UTF8")
 
 end _JsonPrettyCompact
-
