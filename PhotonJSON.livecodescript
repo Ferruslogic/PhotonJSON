@@ -10,7 +10,7 @@ script "PhotonJSON"
 #  Description: LiveCode script library for working with JSON, written in livecode-script and without the use of external.
 #  Note: PhotonJSON follows JSON's standards presented in https://www.json.org/json-en.html
 #  Date: Nov 2020
-#  Last Update: March 2021
+#  Last Update: May 2021
 --------------------------------------------------------------------------------------------------------------------------
 #  declare script local variables
 local sIndentSize
@@ -196,6 +196,7 @@ function JSONStringify pArray, pForceRootType, pPretty
 
         repeat for each  key k in pArray
 
+
             if pArray[ k ] is an array then
 
                 if  tIsNumeric  then
@@ -251,12 +252,15 @@ function JSONStringify pArray, pForceRootType, pPretty
 
     if sRecursionCounter is 0 then
         set the caseSensitive to false
-
+        if numToChar(0) is in tJsonString then replace numToChar(0) with "\u0000" in tJsonString
         if numToChar(8) is in tJsonString then replace numToChar(8) with "\b" in tJsonString
         if numToChar(9) is in tJsonString then replace numToChar(9) with "\t" in tJsonString
         if numToChar(10) is in tJsonString then replace numToChar(10) with "\n" in tJsonString
         if numToChar(12) is in tJsonString then replace numToChar(12) with "\f" in tJsonString
         if numToChar(13) is in tJsonString then replace numToChar(13) with "\r" in tJsonString
+
+        --put _unprintableCharToUnicodeNum(tJsonString) into tJsonString
+
         # Pretty
         if pPretty  then return _JsonPrettyCompact(tJsonString, 2, pForceRootType)
     end if
@@ -279,6 +283,7 @@ function JSONParser pJsonString
     # with all the other unescapes when we parse
     replace "\\" with "\u005C" in pJsonString
     replace (backSlash & quote) with "\u0022" in pJsonString
+    replace numToChar(0) with "\u0000" in pJsonString
 
     repeat for each token tToken in pJsonString
         if tNumKeys < 0  then put 0 into tNumKeys
@@ -372,6 +377,7 @@ function JSONParser pJsonString
             if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
         end if
 
+
         put _utf8decode(tToken) into tToken
 
         put empty  into tOldToken
@@ -394,8 +400,10 @@ function JSONParser pJsonString
     return tResultArray
 end JSONParser
 
+
 private function _JsonString pValue
-    if pValue is not an ascii string then put _utf8encode(pValue) into pValue
+
+    if pValue is not an ascii string then   put _utf8encode(pValue) into pValue
 
     # So these characters escape in case they are there.
     # https://www.json.org/img/string.png
@@ -405,9 +413,8 @@ private function _JsonString pValue
     if "\" is in pValue then replace "\" with "\\" in pValue
     if quote is in pValue then replace quote with "\" & quote in pValue
 
-    return quote &  pValue  & quote
+    return quote &   pValue  & quote
 end _JsonString
-
 
 private function  _JsonValue pValue
     switch pValue
@@ -429,7 +436,9 @@ private function  _JsonValue pValue
                     return pValue
                 end if
             end if
+
             return _JsonString( pValue )
+
     end switch
 end  _JsonValue
 
@@ -696,5 +705,4 @@ private function _JsonPrettyCompact  pJsonString, pIndentSize, pForceRootType
     end repeat
 
     return  textDecode( tFormatted, "UTF8")
-
 end _JsonPrettyCompact
