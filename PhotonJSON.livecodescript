@@ -10,7 +10,7 @@ script "PhotonJSON"
 #  Description: LiveCode script library for working with JSON, written in livecode-script and without the use of external.
 #  Note: PhotonJSON follows JSON's standards presented in https://www.json.org/json-en.html
 #  Date: Nov 2020
-#  Last Update: May 2021
+#  Last Update: March 2021
 --------------------------------------------------------------------------------------------------------------------------
 #  declare script local variables
 local sIndentSize
@@ -259,7 +259,6 @@ function JSONStringify pArray, pForceRootType, pPretty
         if numToChar(12) is in tJsonString then replace numToChar(12) with "\f" in tJsonString
         if numToChar(13) is in tJsonString then replace numToChar(13) with "\r" in tJsonString
 
-        --put _unprintableCharToUnicodeNum(tJsonString) into tJsonString
 
         # Pretty
         if pPretty  then return _JsonPrettyCompact(tJsonString, 2, pForceRootType)
@@ -267,6 +266,7 @@ function JSONStringify pArray, pForceRootType, pPretty
 
     return tJsonString
 end JSONStringify
+
 
 # JSONParser: Gets the LC Array of a JSON string
 # Parameter:
@@ -276,8 +276,8 @@ function JSONParser pJsonString
     local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
     local tOldToken, tObjEmpty = ""
 
-    if pJsonString is empty then return empty
-    if _jsonToUtf8( pJsonString ) is true then return pJsonString
+    if pJsonString is empty or not ( pJsonString begins with "{"  and pJsonString ends with "}" or pJsonString begins with "["  and  pJsonString ends with "]")then return empty
+    --- if _jsonToUtf8( pJsonString ) is true then return pJsonString
     # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
     # so we replace them with "\u0022" and "\u005C" which we'll unescape
     # with all the other unescapes when we parse
@@ -411,7 +411,7 @@ private function _JsonString pValue
     # JSON strings require that certain characters be 'escaped' with a backslash:
     # This makes the processing a bit slower. But it is necessary for it to comply with the ECMA-404 standard
     if "\" is in pValue then replace "\" with "\\" in pValue
-    if quote is in pValue then replace quote with "\" & quote in pValue
+    if quote is in pValue then replace quote with "\u2022" in pValue
 
     return quote &   pValue  & quote
 end _JsonString
@@ -425,7 +425,7 @@ private function  _JsonValue pValue
             return "false"
             break
         case ""
-            return "null"
+            return quote & quote
             break
         case "null"
             return "null"
