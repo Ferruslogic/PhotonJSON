@@ -192,7 +192,7 @@ function JSONStringify pArray, pForceRootType, pPretty
 
 
     # The values of the JSON keys will be formatted to their type.
-    if pForceRootType is "string" or pPretty is true then
+    if pForceRootType is "string" then
 
         repeat for each  key k in pArray
 
@@ -258,10 +258,8 @@ function JSONStringify pArray, pForceRootType, pPretty
         if numToChar(10) is in tJsonString then replace numToChar(10) with "\n" in tJsonString
         if numToChar(12) is in tJsonString then replace numToChar(12) with "\f" in tJsonString
         if numToChar(13) is in tJsonString then replace numToChar(13) with "\r" in tJsonString
-
-
         # Pretty
-        if pPretty  then return _JsonPrettyCompact(tJsonString, 2, pForceRootType)
+        if pPretty  then return _JsonPrettyCompact( tJsonString, 2, pForceRootType)
     end if
 
     return tJsonString
@@ -416,7 +414,7 @@ private function _JsonString pValue
     return quote &   pValue  & quote
 end _JsonString
 
-private function  _JsonValue pValue
+private function  _JsonValue pValue, pNoReplace
     switch pValue
         case "true"
             return "true"
@@ -437,8 +435,11 @@ private function  _JsonValue pValue
                 end if
             end if
 
-            return _JsonString( pValue )
-
+            if pNoReplace is no true then
+                return _JsonString( pValue )
+            else
+                return quote & pValue & quote
+            end if
     end switch
 end  _JsonValue
 
@@ -611,7 +612,6 @@ private function _JsonPrettyCompact  pJsonString, pIndentSize, pForceRootType
 
     if sMaxLength is not an integer then put 50 into sMaxLength
     if pIndentSize is not a integer or pIndentSize > 10 then put 4 into pIndentSize
-    if _jsonToUtf8( pJsonString ) is true then return pJsonString
 
     repeat for pIndentSize
         put space after kSpace
@@ -622,7 +622,6 @@ private function _JsonPrettyCompact  pJsonString, pIndentSize, pForceRootType
     # with all the other unescapes when we parse
     if "\\" is in pJsonString then replace "\\" with "\u005C" in pJsonString
     if backSlash & quote is in pJsonString then replace backSlash & quote with "\u0022" in pJsonString
-    if "\/" is in pJsonString then  replace "\/" with "/" in pJsonString
 
     // In this loop we only get where each JSON object and JSON array begins and ends.
     // For now to measure the size of these to know from where to where is each.
@@ -693,10 +692,10 @@ private function _JsonPrettyCompact  pJsonString, pIndentSize, pForceRootType
                 replace "\u0022"  with  quote in tToken
 
                 if pForceRootType is "string" then
-                    put  _JsonString( tToken ) after tFormatted
+                    put   quote &   tToken  & quote after tFormatted
 
                 else
-                    put _JsonValue( tToken ) after tFormatted
+                    put _JsonValue( tToken ,true ) after tFormatted
 
                 end if
         end switch
