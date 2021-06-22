@@ -42,14 +42,14 @@ Ya tenemos PhotonJSON integrado en nuestro proyecto. Entonces, podemos acceder a
 
 PhotonJSON tiene 5 funciones y una propiedad pública que se puede acceder a ellas desde otro script. También integra 4 funciones para compatibilidad con proyectos que usan otras bibliotecas y quieren comenzar a usar esta. Tenga en cuenta la nota anterior.
 
-| Nombre        | Tipo      | Parámetro                                                    | Devoluciones | Descripción                                                  |
-| ------------- | --------- | ------------------------------------------------------------ | ------------ | ------------------------------------------------------------ |
-| cVersion      | propiedad |                                                              | Versión      | La versión actual de la biblioteca.                          |
-| validateJSON  | función   | Cadena JSON                                                  | Booleano     | Valide si una cadena es un JSON.                             |
-| beautifyJSON  | función   | Cadena JSON, número de espacios y si se trata como Unicode   | Cadena JSON  | Formatea una cadena JSON de una manera más agradable a la vista. |
-| minifyJSON    | función   | JSON y si se trata como Unicode                              | Cadena JSON  | Elimina los espacios innecesarios de la cadena JSON.         |
-| JSONStringify | función   | LC Array, si JSON tiene un buen formato y si se trata como Unicode | Cadena JSON  | Obtiene la cadena JSON de una matriz LC.                     |
-| JSONParser    | función   | Cadena JSON y si se trata como Unicode                       | LC Array     | Obtiene la matriz LC de una cadena JSON.                     |
+| Nombre        | Tipo      | Parámetro                                                    | Devoluciones       | Descripción                                                  |
+| ------------- | --------- | ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ |
+| cVersion      | propiedad |                                                              | Versión            | La versión actual de la biblioteca.                          |
+| validateJSON  | función   | Cadena JSON UTF-8                                            | Booleano           | Valide si una cadena es un JSON.                             |
+| beautifyJSON  | función   | Cadena JSON UTF-8                                            | Cadena JSON UTF-8  | Formatea una cadena JSON de una manera más agradable a la vista. |
+| minifyJSON    | función   | JSON UTF-8                                                   | Cadena JSON  UTF-8 | Elimina los espacios innecesarios de la cadena JSON.         |
+| JSONStringify | función   | LC Array, si se fuerza el tipo de los elementos del JSON y si se formatea de forma bonita | Cadena JSON  UTF-8 | Obtiene la cadena JSON de una matriz LC.                     |
+| JSONParser    | función   | Cadena JSON  UTF-8                                           | LC Array           | Obtiene la matriz LC de una cadena JSON.                     |
 
 
 
@@ -58,7 +58,7 @@ Estas son las cuatro funciones que se incluyen opcionalmente para la compatibili
 
 
 ```
-ArrayToJSON (), JsonToArray (), arrayFromJson () y jsonFromArray ().
+ArrayToJSON(), JsonToArray(), arrayFromJson() y jsonFromArray().
 ```
 
 Si no desea que PhotonJSON sobrescriba las funciones anteriores, simplemente comente el código en la biblioteca PhotonJSON.

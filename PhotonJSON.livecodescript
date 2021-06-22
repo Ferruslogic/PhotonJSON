@@ -1,4 +1,4 @@
-script "PhotonJSON"
+﻿script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
@@ -50,7 +50,7 @@ end cVersion
 -----------------------------------------------------------------------------------------
 
 # validateJSON: Validate if a string is a valid JSON.
-# Parameter: The JSON to evaluate. (String)
+# Parameter: The UTF-8 JSON to evaluate. (String)
 # returns: A boolean. (Boolean)
 function validateJSON pJsonString
     local tCont = 0, tTokenCont = 0, tSplit
@@ -97,9 +97,8 @@ end validateJSON
 
 # beautifyJSON: JSON string formatted in a more visually pleasing way.
 # Parameter:
-# 1: JSON string (String)
-# 2: Numbers of spaces in Indent (Integer)
-# returns: JSON string (String)
+# 1: UTF-8 JSON string (String)
+# returns: UTF-8 JSON string (String)
 function beautifyJSON pJsonString, pIndentSize
     if _jsonToUtf8( pJsonString ) is true then return pJsonString
     if pIndentSize is an integer then put pIndentSize into sIndentSize
@@ -112,8 +111,7 @@ end beautifyJSON
 
 # minifyJSON: Remove unnecessary spaces from JSON string.
 # Parameter:
-# 1: JSON string (String)
-# 2: if it is treated as Unicode (Boolean)
+# 1:  UTF-8 JSON string (String)
 # returns: JSON string (String)
 function minifyJSON pJsonString
     local tFormatted,  tPrevToken = "", tIndex  = 0,  tOpenClose = "",  tItems  = "", tHyphenMinus = false
@@ -266,9 +264,9 @@ function JSONStringify pArray, pForceRootType, pPretty
 end JSONStringify
 
 
-# JSONParser: Gets the LC Array of a JSON string
+# JSONParser: Gets the LC Array of a UTF-8 JSON string
 # Parameter:
-# 1: JSON string (String)
+# 1:  UTF-8 JSON string (String)
 # returns: LC Array (Array)
 function JSONParser pJsonString
     local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
