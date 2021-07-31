@@ -1,4 +1,4 @@
-Library: com.ferruslogic.library.photonjson
+Library: community.ferruslogic.library.photonjson
 
 Type: library
 
@@ -131,7 +131,7 @@ Name: JSONStringify
 
 Type: function
 
-Syntax: JSONStringify(<pArray> ,{[<"object">]|[<"string">]|[<empty>]}, {[<true>]|[<false>]|[<empty>]} )
+Syntax: JSONStringify(<pArray> ,[<pForceRootType>, <pPretty>])
 
 Summary: Remove unnecessary spaces from JSON string.
 

@@ -1,4 +1,4 @@
-﻿script "com.ferruslogic.library.photonJSON"
+﻿script "community.ferruslogic.library.photonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
