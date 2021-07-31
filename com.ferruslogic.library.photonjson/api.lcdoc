@@ -131,7 +131,7 @@ Name: JSONStringify
 
 Type: function
 
-Syntax: JSONStringify(<pArray> ,{[<"object">]|[<"string">]|[<empty>]},|{[<true>]|[<false>]|[<empty>]} )
+Syntax: JSONStringify(<pArray> ,{[<"object">]|[<"string">]|[<empty>]}, {[<true>]|[<false>]|[<empty>]} )
 
 Summary: Remove unnecessary spaces from JSON string.
 
