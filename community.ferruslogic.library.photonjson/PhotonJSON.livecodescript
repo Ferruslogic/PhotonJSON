@@ -1,4 +1,4 @@
-﻿script "community.ferruslogic.library.photonJSON"
+script "community.ferruslogic.library.photonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
@@ -68,7 +68,9 @@ end extensionFinalize
 # returns: A boolean. (Boolean)
 function validateJSON pJsonString
     local tCont = 0, tTokenCont = 0, tSplit
-    if _jsonToUtf8( pJsonString ) is true then return pJsonString
+
+    if the number of words of pJsonString is 0 then return false
+
     # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
     # so we replace them with "\u0022" and "\u005C" which we'll unescape
     # with all the other unescapes when we parse
