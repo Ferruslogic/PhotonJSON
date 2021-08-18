@@ -37,28 +37,6 @@ on extensionFinalize
     remove the script of me from back
 end extensionFinalize
 
------------------------------------------------------------------------------------------
---- These functions are for compatibility with projects that use mergJSON ---
------------------------------------------------------------------------------------------
---function jsonToArray pJSON
---    return JSONParser(pJSON,true)
---end jsonToArray
-
---function arrayToJson pArray, pForceRootType, pPretty
---    return JSONStringify(pArray,pPretty,true)
---end arrayToJson
-
-----------------------------------------------------------------------------------------
---- These functions are for compatibility with projects that use FASTJSON ---
-----------------------------------------------------------------------------------------
---function arrayFromJson pJson
---    return JSONParser(pJSON,true)
---end arrayFromJson
-
---function jsonFromArray pArray, pForceRootType, pPretty
---    return JSONStringify(pArray,pPretty,true)
---end jsonFromArray
-
 ------------------------------------------------------------------------------------------
 ------------------------------ CODE OF LIBRARY -------------------------------------
 -----------------------------------------------------------------------------------------
@@ -184,7 +162,7 @@ local sRecursionCounter = 0
 # JSONStringify: Gets the JSON string from an LC Array.
 # Parameter:
 # 1: LC Array (Array)
-# 2:
+# 2: Forcer root type
 # 3: if JSON is formatted nice (Boolean)
 # returns: JSON string (String)
 function JSONStringify pArray, pForceRootType, pPretty

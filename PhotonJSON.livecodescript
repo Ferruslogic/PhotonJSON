@@ -23,28 +23,6 @@ getProp cVersion
     return kVersion
 end cVersion
 
------------------------------------------------------------------------------------------
---- These functions are for compatibility with projects that use mergJSON ---
------------------------------------------------------------------------------------------
---function jsonToArray pJSON
---    return JSONParser(pJSON,true)
---end jsonToArray
-
---function arrayToJson pArray, pForceRootType, pPretty
---    return JSONStringify(pArray,pPretty,true)
---end arrayToJson
-
-----------------------------------------------------------------------------------------
---- These functions are for compatibility with projects that use FASTJSON ---
-----------------------------------------------------------------------------------------
---function arrayFromJson pJson
---    return JSONParser(pJSON,true)
---end arrayFromJson
-
---function jsonFromArray pArray, pForceRootType, pPretty
---    return JSONStringify(pArray,pPretty,true)
---end jsonFromArray
-
 ------------------------------------------------------------------------------------------
 ------------------------------ CODE OF LIBRARY -------------------------------------
 -----------------------------------------------------------------------------------------
@@ -54,7 +32,9 @@ end cVersion
 # returns: A boolean. (Boolean)
 function validateJSON pJsonString
     local tCont = 0, tTokenCont = 0, tSplit
-    if _jsonToUtf8( pJsonString ) is true then return pJsonString
+
+    if the number of words of pJsonString is 0 then return false
+
     # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
     # so we replace them with "\u0022" and "\u005C" which we'll unescape
     # with all the other unescapes when we parse
@@ -168,7 +148,7 @@ local sRecursionCounter = 0
 # JSONStringify: Gets the JSON string from an LC Array.
 # Parameter:
 # 1: LC Array (Array)
-# 2:
+# 2: Forcer root type
 # 3: if JSON is formatted nice (Boolean)
 # returns: JSON string (String)
 function JSONStringify pArray, pForceRootType, pPretty
