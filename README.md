@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-QvaPay-green.svg)](https://qvapay.com/payme/ferruslogic?r_id=PhotonJSON&msg=Donate%20to%20Ferruslogic)
+
 # PhotonJSON
 [Leer en Español](LEEME.md)
 
