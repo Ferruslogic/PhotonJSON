@@ -252,8 +252,7 @@ function JSONParser pJsonString
     local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus
     local tOldToken, tObjEmpty = ""
 
-    if pJsonString is empty or not ( pJsonString begins with "{"  and pJsonString ends with "}" or pJsonString begins with "["  and  pJsonString ends with "]")then return empty
-    --- if _jsonToUtf8( pJsonString ) is true then return pJsonString
+    if pJsonString is empty then return empty
     # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
     # so we replace them with "\u0022" and "\u005C" which we'll unescape
     # with all the other unescapes when we parse
@@ -359,9 +358,7 @@ function JSONParser pJsonString
         put empty  into tOldToken
 
         if tKeyNameOrValue = 1 then
-            if "null" is tToken then
-                put empty into tToken
-            else if tHyphenMinus then
+            if tHyphenMinus then
                 put "-" & tToken into tToken
                 put false into tHyphenMinus
             end if
