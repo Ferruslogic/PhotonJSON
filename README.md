@@ -43,14 +43,13 @@ We already have PhotonJSON integrated into our project. So, we can access all th
 
 PhotonJSON has 5 functions and a public property that is, they can be accessed from another script. It also integrates 4 functions for compatibility with projects that use other libraries and want to start using this one. Please note the above note.
 
-| Name          | Type     | Parameter                                                    | Returns           | Description                                            |
-| :------------ | -------- | ------------------------------------------------------------ | ----------------- | ------------------------------------------------------ |
-| cVersion      | property |                                                              | Version           | The current version of the library.                    |
-| validateJSON  | function | UTF-8 JSON string                                            | Boolean           | Validate if a string is a valid JSON.                  |
-| beautifyJSON  | function | UTF-8 JSON string                                            | UTF-8 JSON string | JSON string formatted in a more visually pleasing way. |
-| minifyJSON    | function | UTF-8 JSON string                                            | UTF-8 JSON string | Remove unnecessary spaces from JSON string.            |
-| JSONStringify | function | LC Array, if the type of the JSON elements is forced and if it is formatted in a beautiful way | UTF-8 JSON string | Gets the JSON string from an LC Array.                 |
-| JSONParser    | function | UTF-8 JSON string                                            | LC Array          | Gets the LC Array of a JSON string.                    |
+| Name          | Type     | Parameter                                                    | Returns           | Description                                 |
+| :------------ | -------- | ------------------------------------------------------------ | ----------------- | ------------------------------------------- |
+| cVersion      | property |                                                              | Version           | The current version of the library.         |
+| validateJSON  | function | UTF-8 JSON string                                            | Boolean           | Validate if a string is a valid JSON.       |
+| minifyJSON    | function | UTF-8 JSON string                                            | UTF-8 JSON string | Remove unnecessary spaces from JSON string. |
+| JSONStringify | function | LC Array, if the type of the JSON elements is forced and if it is formatted in a beautiful way | UTF-8 JSON string | Gets the JSON string from an LC Array.      |
+| JSONParser    | function | UTF-8 JSON string                                            | LC Array          | Gets the LC Array of a JSON string.         |
 
 These are the four functions that are optionally included for PhotonJSON compatibility with projects that use mergeJSON or FastJSON. They expect the same parameters as in their original versions and in the same order.
 

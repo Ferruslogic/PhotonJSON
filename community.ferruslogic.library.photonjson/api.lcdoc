@@ -4,7 +4,7 @@ Type: library
 
 Title: PhotonJSON
 
-Version: 1.1.0
+Version: 1.1.1
 
 Author: FerrusLogic
 
@@ -61,40 +61,6 @@ The result:
 Boolean
 
 
-
-
-
-
-Name: beautifyJSON
-
-Type: function
-
-Syntax: beautifyJSON(<pJSON>)
-
-Summary: JSON string formatted in a more visually pleasing way.
-
-OS: mac, windows, linux, ios, android
-
-Platforms: desktop, server, mobile
-
-Edition: Community
-
-
-Example: put beautifyJSON( URL "file:../Path/setting.json" ) into URL "file:../Path/setting.json"
-
-
-Related: validateJSON (function), minifyJSON (function), JSONStringify (function), JSONParser (function)
-
-
-Parameters:
-
-pJSON: UTF-8 JSON string
-
-Description:
-JSON string formatted in a more visually pleasing way.
-
-The result:
-UTF-8 JSON string
 
 
 
