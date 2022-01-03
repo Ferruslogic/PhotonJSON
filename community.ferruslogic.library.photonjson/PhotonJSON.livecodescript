@@ -1,4 +1,4 @@
-script "community.ferruslogic.library.photonJSON"
+﻿script "community.ferruslogic.library.photonjson"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
@@ -27,21 +27,26 @@ getProp cVersion
     return kVersion
 end cVersion
 
-
-------------------------------------------------------------------------------------------
 on extensionInitialize
-    if the target is not me then pass extensionInitialize
+    if the target is not me then
+       pass extensionInitialize
+    end if
+    
     insert the script of me into back
-    set the _ideoverride of me to true
-end extensionInitialize
+    
+    if the environment contains "development" then
+       set the _ideoverride of me to true
+    end if
+ end extensionInitialize
+ 
+ on extensionFinalize
+    if the target is not me then
+       pass extensionFinalize
+    end if
 
-
-on extensionFinalize
-    if the target is not me then pass extensionFinalize
     remove the script of me from back
-end extensionFinalize
-
-------------------------------------------------------------------------------------------
+ end extensionFinalize
+------------------------------------------------------------------------------------
 ------------------------------ CODE OF LIBRARY -------------------------------------
 ------------------------------------------------------------------------------------
 
@@ -367,7 +372,6 @@ function JSONParser pJsonString
         end if
 
         put textDecode(tToken, "UTF-8") into tToken
-
         put empty into tOldToken
 
         if tKeyNameOrValue = 1 then
@@ -611,8 +615,10 @@ private function _jsonPrettyCompact pJsonString, pIndentSize, pForceRootType
                     put false into tHyphenMinus
                 end if
 
-                replace "\u005C" with "\" in tToken
-                replace "\u0022" with quote in tToken
+                if "\u00" is in tToken then
+                    replace "\u005C" with "\" in tToken
+                    replace "\u0022"  with  quote in tToken
+                end if
 
                 if pForceRootType is "string" then
                     put quote & tToken & quote after tFormatted

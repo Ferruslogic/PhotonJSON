@@ -353,7 +353,6 @@ function JSONParser pJsonString
         end if
 
         put textDecode(tToken, "UTF-8") into tToken
-
         put empty into tOldToken
 
         if tKeyNameOrValue = 1 then
@@ -597,8 +596,10 @@ private function _jsonPrettyCompact pJsonString, pIndentSize, pForceRootType
                     put false into tHyphenMinus
                 end if
 
-                replace "\u005C" with "\" in tToken
-                replace "\u0022" with quote in tToken
+                if "\u00" is in tToken then
+                    replace "\u005C" with "\" in tToken
+                    replace "\u0022"  with  quote in tToken
+                end if
 
                 if pForceRootType is "string" then
                     put quote & tToken & quote after tFormatted
