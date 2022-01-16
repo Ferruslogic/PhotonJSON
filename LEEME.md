@@ -42,6 +42,7 @@ PhotonJSON tiene 5 funciones y una propiedad pública que se puede acceder a ell
 | cVersion      | propiedad |                                                              | Versión            | La versión actual de la biblioteca.                          |
 | validateJSON | función   | Cadena JSON UTF-8                                            | Booleano           | Valide si una cadena es un JSON.                             |
 | minifyJSON    | función   | JSON UTF-8                                                   | Cadena JSON UTF-8 | Elimina los espacios innecesarios de la cadena JSON.         |
+| beautifyJSON  | función   | Cadena JSON UTF-8                                            | Cadena JSON UTF-8  | Formatea una cadena JSON de una manera más agradable a la vista. |
 | JSONStringify | función   | LC Array, si se fuerza el tipo de los elementos del JSON y si se formatea de forma bonita | Cadena JSON UTF-8 | Obtiene la cadena JSON de una matriz LC.                     |
 | JSONParser    | función   | Cadena JSON UTF-8                                           | LC Array           | Obtiene la matriz LC de una cadena JSON.                     |
 
