@@ -2,7 +2,7 @@ script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.1.2
+#  Version: v1.2.0
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -20,7 +20,7 @@ local sIndentSize, sMaxLength
 local sRecursionCounter = 0
 
 # Declare constants
-constant kVersion = "v1.1.2"
+constant kVersion = "v1.2.0"
 
 # The current version of the library.
 getProp cVersion
