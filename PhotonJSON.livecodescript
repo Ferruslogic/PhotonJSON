@@ -191,11 +191,11 @@ end minifyJSON
 # returns: JSON string (String)
 function JSONStringify pArray, pForceRootType, pPretty
    local tJsonString = "[", tIsNumeric = true, tKeys = "", tEndChar = "]"
-   
+
    add 1 to sRecursionCounter
-   
+
    if pArray is not an array then return "{}"
-   
+
    # The array's keys are all *numerical*, so the root element will be a JSON *array*
    repeat for each key k in pArray
       if k is not an integer then
@@ -205,40 +205,40 @@ function JSONStringify pArray, pForceRootType, pPretty
          exit repeat
       end if
    end repeat
-   
+
    set the caseSensitive to true
-   
+
    # The values of the JSON keys will be formatted to their type.
    if pForceRootType is "string" then
-      
+
       repeat for each key k in pArray
          if pArray[ k ] is an array then
-            
+
             if  tIsNumeric then
                put (JSONStringify ( pArray[ k ] , "string", pPretty)) & comma after tJsonString
                next repeat
-               
+
             else
                put _jsonString( k ) & ": " & (JSONStringify( pArray[ k ], "string", pPretty)) & comma after tJsonString
                next repeat
             end if
-            
+
          else if tIsNumeric then
             put _jsonString( pArray[ k ] ) & comma after tJsonString
             next repeat
-            
+
          else
             put _jsonString( k ) & ": " & _jsonString( pArray[ k ] ) & comma after tJsonString
             next repeat
-            
+
          end if
       end repeat
-      
+
    else
-      
+
       repeat for each key k in pArray
          if pArray[ k ] is an array then
-            
+
             if tIsNumeric then
                put (JSONStringify ( pArray[ k ] )) & comma after tJsonString
                next repeat
@@ -246,19 +246,19 @@ function JSONStringify pArray, pForceRootType, pPretty
                put _jsonString( k ) & ": " & (JSONStringify( pArray[ k ] )) & comma after tJsonString
                next repeat
             end if
-            
+
          else if tIsNumeric then
             put _jsonValue( pArray[ k ] ) & comma after tJsonString
             next repeat
-            
+
          else
             put _jsonString( k ) & ": " & _jsonValue( pArray[ k ] ) & comma after tJsonString
             next repeat
          end if
       end repeat
-      
+
    end if
-   
+
    put tEndChar into the char - 1 of tJsonString
    -- empty array and empty objects
    if tJsonString is "["&quote&quote&"]" then
@@ -266,7 +266,7 @@ function JSONStringify pArray, pForceRootType, pPretty
    else  if tJsonString is "{"&quote&quote&": "&quote&quote&"}" then
       put "{}" into tJsonString
    end if
-   
+
    subtract 1 from sRecursionCounter
    
    if sRecursionCounter is 0 then
