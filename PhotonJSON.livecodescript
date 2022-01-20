@@ -2,7 +2,7 @@ script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.1.2
+#  Version: v1.2.0
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -20,7 +20,7 @@ local sIndentSize, sMaxLength
 local sRecursionCounter = 0
 
 # Declare constants
-constant kVersion = "v1.1.2"
+constant kVersion = "v1.2.0"
 
 # The current version of the library.
 getProp cVersion
@@ -169,6 +169,7 @@ function minifyJSON pJsonString
 
             replace "\u005C" with "\" in tToken
             replace "\u0022" with quote in tToken
+
             put _jsonString( tToken ) after tFormatted
       end switch
 
@@ -259,6 +260,14 @@ function JSONStringify pArray, pForceRootType, pPretty
    end if
 
    put tEndChar into the char - 1 of tJsonString
+
+   # Empty array and empty objects
+   if tJsonString is "[null]" then
+      put "[]" into tJsonString
+   else  if tJsonString is "{"&quote&quote&": null}" then
+      put "{}" into tJsonString
+   end if
+
    subtract 1 from sRecursionCounter
 
    if sRecursionCounter is 0 then
@@ -282,7 +291,7 @@ end JSONStringify
 # 1: UTF-8 JSON string (String)
 # returns: LC Array (Array)
 function JSONParser pJsonString
-   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tOldToken, tObjEmpty = ""
+   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tOldToken, tObjEmpty
 
    if pJsonString is empty then return empty
    replace tab with empty in pJsonString
@@ -294,6 +303,15 @@ function JSONParser pJsonString
    replace "\\" with "\u005C" in pJsonString
    replace (backSlash & quote) with "\u0022" in pJsonString
    replace numToChar(0) with "\u0000" in pJsonString
+
+   if the number of tokens of pJsonString is 2 then
+      if token 1 of pJsonString is "[" and the token 2 of  pJsonString is "]" then
+         put empty into tResultArray[1]
+         return tResultArray
+      end if
+      return empty
+   end if
+
 
    repeat for each token tToken in pJsonString
       if tNumKeys < 0 then put 0 into tNumKeys
@@ -317,6 +335,7 @@ function JSONParser pJsonString
          case "}"
             # Fix bug when JSON has empty objects
             if tOldToken is "{" then
+               put empty into tObjEmpty[empty]
                _builderArray tObjEmpty, tArrayKeysPath, tResultArray, tNumKeys
                put tToken into tOldToken
                next repeat
@@ -358,6 +377,7 @@ function JSONParser pJsonString
 
             # Fix bug when JSON has empty array
             if tOldToken is "[" then
+               put empty into  tObjEmpty[1]
                _builderArray tObjEmpty, tArrayKeysPath, tResultArray, tNumKeys
                put tToken into tOldToken
             end if
@@ -430,11 +450,7 @@ private function _jsonValue pValue, pNoReplace
          return "false"
          break
 
-      case ""
-         return quote & quote
-         break
-
-      case "null"
+      case ""; case "null"; case null
          return "null"
          break
 
@@ -464,7 +480,7 @@ private command _builderArray @pValue, @pListKeys, @pArray, @pNumKeys
 
    switch pNumKeys
       case 0
-         break
+         -- break
       case 1
          put pValue into pArray[pListKeys[1]]
          break
@@ -647,5 +663,3 @@ end _jsonPrettyCompact
 private function _validateJSON pJsonString
    return (the token 1 of pJsonString is "{" and the token -1 of pJsonString is "}") or (the token 1 of pJsonString is "[" or the token -1 of pJsonString is "]")
 end _validateJSON
-
-
