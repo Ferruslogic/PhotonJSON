@@ -1,4 +1,4 @@
-script "PhotonJSON"
+﻿script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
@@ -169,6 +169,7 @@ function minifyJSON pJsonString
 
             replace "\u005C" with "\" in tToken
             replace "\u0022" with quote in tToken
+
             put _jsonString( tToken ) after tFormatted
       end switch
 
@@ -289,7 +290,7 @@ end JSONStringify
 # 1: UTF-8 JSON string (String)
 # returns: LC Array (Array)
 function JSONParser pJsonString
-   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tOldToken, tObjEmpty = ""
+   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tOldToken, tObjEmpty
    
    if pJsonString is empty then return empty
    replace tab with empty in pJsonString
@@ -443,26 +444,22 @@ private function _jsonValue pValue, pNoReplace
       case "true"
          return "true"
          break
-
+         
       case "false"
          return "false"
          break
-
-      case ""
-         return quote & quote
-         break
-
-      case "null"
+         
+      case ""; case "null"; case null
          return "null"
          break
-
+         
       default
          if pValue is a number then
             if not (char 1 of pValue is 0 and char 2 of pValue is not "." and the length of pValue is not 1 or char 1 of pValue is not in "-0123456789") then
                return pValue
             end if
          end if
-
+         
          if pNoReplace is no true then
             return _jsonString( pValue )
          else
