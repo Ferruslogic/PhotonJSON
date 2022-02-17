@@ -42,7 +42,7 @@ end extensionFinalize
 -------------------------------------------------------------------------------------------
 # These are the four functions that are optionally included for PhotonJSON compatibility with projects that use mergeJSON or FastJSON.
 # They expect the same parameters as in their original versions and in the same order.
-/*
+# Warning! These functions will override original ones, if you don't want this beavior then comment out these four functions
 function  ArrayToJSON pArray,pForceRootType,pPretty
    return JSONStringify(pArray, pForceRootType, pPretty)
 end ArrayToJSON
@@ -58,7 +58,7 @@ end arrayFromJson
 function jsonFromArray pArray
    return JSONStringify(pArray)
 end jsonFromArray
-*/
+
 ------------------------------------------------------------------------------------
 ------------------------------ CODE OF LIBRARY -------------------------------
 ------------------------------------------------------------------------------------
