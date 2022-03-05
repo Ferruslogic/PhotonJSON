@@ -1,4 +1,4 @@
-script "PhotonJSON"
+﻿script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
@@ -37,6 +37,11 @@ on extensionFinalize
    if the target is not me then pass extensionFinalize
    remove the script of me from back
 end extensionFinalize
+
+
+getProp cREVGeneral[pSet]
+	if pSet is "handlerlist" then return _filterHandlerList(the revAvailableHandlers of me)
+end cREVGeneral
 
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -291,38 +296,41 @@ end JSONStringify
 # 1: UTF-8 JSON string (String)
 # returns: LC Array (Array)
 function JSONParser pJsonString
-   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tOldToken, tObjEmpty
-
+   local tKeyNameOrValue = 0, tArrayKeysPath , tNumKeys = 0 ,tOpenJArray, tResultArray, tHyphenMinus, tToken, tOldToken, tObjEmpty
+   
    if pJsonString is empty then return empty
    replace tab with empty in pJsonString
    replace cr with empty in pJsonString
-
+   
    # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
    # so we replace them with "\u0022" and "\u005C" which we'll unescape
    # with all the other unescapes when we parse
    replace "\\" with "\u005C" in pJsonString
    replace (backSlash & quote) with "\u0022" in pJsonString
    replace numToChar(0) with "\u0000" in pJsonString
-
+   
    if the number of tokens of pJsonString is 2 then
       if token 1 of pJsonString is "[" and the token 2 of  pJsonString is "]" then
          put empty into tResultArray[1]
          return tResultArray
+      else if token 1 of pJsonString is "{" and the token 2 of pJsonString is "}" then
+         put empty into tResultArray[empty]
+         return tResultArray
       end if
       return empty
    end if
-
-
+   
+   
    repeat for each token tToken in pJsonString
       if tNumKeys < 0 then put 0 into tNumKeys
-
+      
       switch tToken
          case "{"
             put 0 into tKeyNameOrValue
             put tToken into tOldToken
             next repeat
             break
-
+            
          case "["
             add 1 to tNumKeys
             put 1 into tKeyNameOrValue
@@ -331,7 +339,7 @@ function JSONParser pJsonString
             put tToken into tOldToken
             next repeat
             break
-
+            
          case "}"
             # Fix bug when JSON has empty objects
             if tOldToken is "{" then
@@ -340,13 +348,13 @@ function JSONParser pJsonString
                put tToken into tOldToken
                next repeat
             end if
-
+            
             delete variable tArrayKeysPath[tNumKeys]
             subtract 1 from tNumKeys
             put tToken into tOldToken
             next repeat
             break
-
+            
          case comma
             if tOpenJArray[ tNumKeys ] <> empty then
                if tArrayKeysPath[tNumKeys ] is an integer then
@@ -358,42 +366,42 @@ function JSONParser pJsonString
                subtract 1 from tNumKeys
                put 0 into tKeyNameOrValue
             end if
-
+            
             put tToken into tOldToken
             next repeat
             break
-
+            
          case colon
             put 1 into tKeyNameOrValue
             put tToken into tOldToken
             next repeat
             break
-
+            
          case "]"
             delete variable tArrayKeysPath[tNumKeys]
             delete variable tOpenJArray[tNumKeys]
             subtract 1 from tNumKeys
             put 0 into tKeyNameOrValue
-
+            
             # Fix bug when JSON has empty array
             if tOldToken is "[" then
                put empty into  tObjEmpty[1]
                _builderArray tObjEmpty, tArrayKeysPath, tResultArray, tNumKeys
                put tToken into tOldToken
             end if
-
+            
             put tToken into tOldToken
             next repeat
             break
-
+            
          case "-"
             put true into tHyphenMinus
             put tToken into tOldToken
             next repeat
             break
-
+            
       end switch
-
+      
       if backslash is in tToken then
          if "\n" is in tToken then replace "\n" with numToChar(10) in tToken
          if "\r" is in tToken then replace "\r" with numToChar(13) in tToken
@@ -405,23 +413,34 @@ function JSONParser pJsonString
          if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
          if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
       end if
-
+      
+      if tOldToken is not in "{[,:-" then
+         # JSON string format error
+         return empty
+      end if
+      
       put textDecode(tToken, "UTF-8") into tToken
       put empty into tOldToken
-
+      
       if tKeyNameOrValue = 1 then
+         
          if tHyphenMinus then
             put "-" & tToken into tToken
             put false into tHyphenMinus
          end if
-
+         
          _builderArray tToken, tArrayKeysPath, tResultArray, tNumKeys
       else if tKeyNameOrValue = 0 then
          add 1 to tNumKeys
          put tToken into tArrayKeysPath[tNumKeys]
       end if
    end repeat
-
+   
+   if tOldToken is in "{[,:-" then
+      # JSON string format error
+      return empty
+   end if
+   
    return tResultArray
 end JSONParser
 
@@ -663,3 +682,8 @@ end _jsonPrettyCompact
 private function _validateJSON pJsonString
    return (the token 1 of pJsonString is "{" and the token -1 of pJsonString is "}") or (the token 1 of pJsonString is "[" or the token -1 of pJsonString is "]")
 end _validateJSON
+
+private function _filterHandlerList pList
+	filter lines of pList without regex pattern "^P.*"
+	return pList
+end _filterHandlerList
