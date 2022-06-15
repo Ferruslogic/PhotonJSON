@@ -1,8 +1,8 @@
-script "PhotonJSON"
+﻿script "PhotonJSON"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.2.0
+#  Version: v1.2.2
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -20,7 +20,7 @@ local sIndentSize, sMaxLength
 local sRecursionCounter = 0
 
 # Declare constants
-constant kVersion = "v1.2.0"
+constant kVersion = "v1.2.2"
 
 # The current version of the library.
 getProp cVersion
@@ -77,7 +77,7 @@ function validateJSON pJsonString
 
    if _validateJSON(pJsonString) is false then return false
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # escaped quotes < \ " > and reverse-solidus < \\ > will confuse the tokenizer
    # so we replace them with "\u0022" and "\u005C" which we'll unescape
    # with all the other unescapes when we parse
    if "\\" is in pJsonString then replace "\\" with "\u005C" in pJsonString
@@ -146,7 +146,7 @@ function minifyJSON pJsonString
    replace tab with empty in pJsonString
    replace cr with empty in pJsonString
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # escaped quotes < \ " > and reverse-solidus < \\ > will confuse the tokenizer
    # so we replace them with "\u0022" and "\u005C" which we'll unescape
    # with all the other unescapes when we parse
    if "\\" is in pJsonString then replace "\\" with "\u005C" in pJsonString
@@ -302,7 +302,7 @@ function JSONParser pJsonString
    replace tab with empty in pJsonString
    replace cr with empty in pJsonString
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # escaped quotes < \ " > and reverse-solidus < \\ > will confuse the tokenizer
    # so we replace them with "\u0022" and "\u005C" which we'll unescape
    # with all the other unescapes when we parse
    replace "\\" with "\u005C" in pJsonString
@@ -591,7 +591,7 @@ private function _jsonPrettyCompact pJsonString, pIndentSize, pForceRootType
       put space after kSpace
    end repeat
 
-   # escaped quotes < \" > and reverse-solidus < \\ > will confuse the tokenizer
+   # escaped quotes < \ " > and reverse-solidus < \\ > will confuse the tokenizer
    # so we replace them with "\u0022" and "\u005C" which we'll unescape
    # with all the other unescapes when we parse
    if "\\" is in pJsonString then replace "\\" with "\u005C" in pJsonString
@@ -661,8 +661,8 @@ private function _jsonPrettyCompact pJsonString, pIndentSize, pForceRootType
             end if
 
             if "\u00" is in tToken then
-               replace "\u005C" with "\" in tToken
-               replace "\u0022" with quote in tToken
+               replace "\u005C" with "\\" in tToken
+               replace "\u0022" with "\" & quote in tToken
             end if
 
             if pForceRootType is "string" then
