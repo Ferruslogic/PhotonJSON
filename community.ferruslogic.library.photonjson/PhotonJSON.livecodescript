@@ -2,7 +2,7 @@ script "community.ferruslogic.library.photonjson"
 --------------------------------------------------------------------------------------------------------------------------
 #  Name: PhotonJSON
 #  Type: Library
-#  Version: v1.2.2
+#  Version: v1.2.3
 #  Author: FerrusLogic
 #  Code repository: https://github.com/Ferruslogic/PhotonJSON/
 #  Web: https://ferruslogic.com/
@@ -20,7 +20,7 @@ local sIndentSize, sMaxLength
 local sRecursionCounter = 0
 
 # Declare constants
-constant kVersion = "v1.2.2"
+constant kVersion = "v1.2.3"
 
 # The current version of the library.
 getProp cVersion
@@ -83,6 +83,7 @@ function validateJSON pJsonString
    if "\\" is in pJsonString then replace " " with " " in pJsonString
    if (backSlash & quote) is in pJsonString then replace (backSlash & quote) with "\u0022" in pJsonString
    if "\/" is in pJsonString then replace "\/" with "/" in pJsonString
+   put _cleaningNonPrintableChars(pJsonString) into pJsonString
 
    repeat for each token tToken in pJsonString
       add 1 to tTokenCont
@@ -130,6 +131,7 @@ function beautifyJSON pJsonString, pIndentSize
 
    replace tab with empty in pJsonString
    replace cr with empty in pJsonString
+   put _cleaningNonPrintableChars(pJsonString) into pJsonString
 
    return _jsonPrettyCompact(pJsonString, pIndentSize)
 end beautifyJSON
@@ -152,6 +154,7 @@ function minifyJSON pJsonString
    if "\\" is in pJsonString then replace " " with " " in pJsonString
    if (backSlash & quote) is in pJsonString then replace (backSlash & quote) with "\u0022" in pJsonString
    if "\/" is in pJsonString then replace "\/" with "/" in pJsonString
+   put _cleaningNonPrintableChars(pJsonString) into pJsonString
 
    repeat for each token tToken in pJsonString
 
@@ -277,15 +280,18 @@ function JSONStringify pArray, pForceRootType, pPretty
 
    if sRecursionCounter is 0 then
       set the caseSensitive to false
-      if numToChar(0) is in tJsonString then replace numToChar(0) with "\u0000" in tJsonString
       if numToChar(8) is in tJsonString then replace numToChar(8) with "\b" in tJsonString
       if numToChar(9) is in tJsonString then replace numToChar(9) with "\t" in tJsonString
       if numToChar(10) is in tJsonString then replace numToChar(10) with "\n" in tJsonString
       if numToChar(12) is in tJsonString then replace numToChar(12) with "\f" in tJsonString
       if numToChar(13) is in tJsonString then replace numToChar(13) with "\r" in tJsonString
+      // non-printable characters to your unicode code (HEX)
+      put _cleaningNonPrintableChars(tJsonString) into tJsonString
+
       # Pretty
       if pPretty then return _jsonPrettyCompact(tJsonString, 2, pForceRootType)
    end if
+
 
    return tJsonString
 end JSONStringify
@@ -411,6 +417,7 @@ function JSONParser pJsonString
          if "\b" is in tToken then replace "\b" with numToChar(8) in tToken
          if "\u0022" is in tToken then replace "\u0022" with quote in tToken
          if "\u005C" is in tToken then replace "\u005C" with "\" in tToken
+         if "\u" is in tToken then put _resetNonPrintableChars(tToken) into tToken
          if "\u" is in tToken then put _unicodeEscapes(tToken) into tToken
       end if
 
@@ -455,7 +462,6 @@ private function _jsonString pValue
    # This makes the processing a bit slower. But it is necessary for it to comply with the ECMA-404 standard
    if "\" is in pValue then replace " " with " " in pValue
    if quote is in pValue then replace quote with "\" & quote in pValue
-
    return quote & pValue & quote
 end _jsonString
 
@@ -687,3 +693,53 @@ private function _filterHandlerList pList
    filter lines of pList without regex pattern "^P.*"
    return pList
 end _filterHandlerList
+
+
+// non-printable characters to your unicode code (HEX)
+constant kNonPrintableChars = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,8216,8217,8220,8221,8212,8213,8230"
+private function _cleaningNonPrintableChars pText
+   set the formSensitive to false
+
+   repeat for each item i in kNonPrintableChars
+      if numToChar(i) is in pText then
+         replace numToChar(i) with _convertAsciiToUnicodeNum(i) in pText
+      end if
+   end repeat
+
+   return pText
+end _cleaningNonPrintableChars
+
+
+private function _resetNonPrintableChars pText
+   local tUnicode
+   set the formSensitive to false
+
+   repeat for each item i in kNonPrintableChars
+      put _convertAsciiToUnicodeNum(i) into tUnicode
+      if tUnicode is in pText then
+         replace tUnicode with numToChar(i) in pText
+      end if
+   end repeat
+
+   return pText
+end _resetNonPrintableChars
+
+
+private function _convertAsciiToUnicodeNum pNum
+   put baseConvert(pNum, 10, 16) into pNum
+   switch the length of pNum
+      case 1
+         return "\u000" & pNum
+         break
+      case 2
+         return "\u00" & pNum
+         break
+      case 3
+         return "\u0" & pNum
+         break
+      case 4
+         return "\u" & pNum
+         break
+   end switch
+end _convertAsciiToUnicodeNum
+
