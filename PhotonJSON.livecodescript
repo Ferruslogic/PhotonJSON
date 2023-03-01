@@ -1,17 +1,44 @@
 ﻿script "community.ferruslogic.library.photonjson"
---------------------------------------------------------------------------------------------------------------------------
-#  Name: PhotonJSON
-#  Type: Library
-#  Version: v1.2.3
-#  Author: FerrusLogic
-#  Code repository: https://github.com/Ferruslogic/PhotonJSON/
-#  Web: https://ferruslogic.com/
-#  License: https://opensource.org/licenses/MIT
-#  Description: LiveCode script library for working with JSON, written in livecode-script and without the use of external.
-#  Note: PhotonJSON follows JSON's standards presented in https://www.json.org/json-en.html
-#  Date: Nov 2020
-#  Last Update: December 1, 2021
---------------------------------------------------------------------------------------------------------------------------
+
+/** 
+Name: PhotonJSON
+
+Type: Library
+
+Version: v1.2.4
+
+Author: FerrusLogic
+
+Code repository: https://github.com/Ferruslogic/PhotonJSON/
+
+Web: https://ferruslogic.com/
+
+License: https://opensource.org/licenses/MIT
+
+Description: LiveCode script library for working with JSON, written in livecode-script and without the use of external.
+
+Note: PhotonJSON follows JSON's standards presented in https://www.json.org/json-en.html
+
+Date: Nov 2020
+
+Last Update: March 1, 2023
+
+*/
+
+
+
+on extensionInitialize
+   if the target is not me then pass extensionInitialize
+   if the environment contains "development" then set the _ideOverride of me to true
+   insert the script of me into back
+end extensionInitialize
+
+on extensionFinalize
+   if the target is not me then pass extensionFinalize
+   remove the script of me from back
+end extensionFinalize
+
+
 #  Declare script local variables
 local sIndentSize, sMaxLength
 
@@ -23,55 +50,128 @@ local sRecursionCounter = 0
 constant kVersion = "v1.2.3"
 
 # The current version of the library.
+/**
+Summary: Virtual property to return the current version of the library.
+
+Description:
+Virtual property to return the current version of the library.
+
+Tags: JSON
+
+*/
 getProp cVersion
    return kVersion
 end cVersion
 
-on extensionInitialize
-   if the target is not me then pass extensionInitialize
-   if the environment contains "development" then set the _ideoverride of me to true
-   insert the script of me into back
-end extensionInitialize
-
-on extensionFinalize
-   if the target is not me then pass extensionFinalize
-   remove the script of me from back
-end extensionFinalize
-
-
-getProp cREVGeneral[pSet]
-   if pSet is "handlerlist" then return _filterHandlerList(the revAvailableHandlers of me)
-end cREVGeneral
+// getProp cREVGeneral[pSet]
+//    if pSet is "handlerList" then return _filterHandlerList(the revAvailableHandlers of me)
+// end cREVGeneral
 
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
 # These are the four functions that are optionally included for PhotonJSON compatibility with projects that use mergeJSON or FastJSON.
 # They expect the same parameters as in their original versions and in the same order.
-# Warning! These functions will override original ones, if you don't want this beavior then comment out these four functions
+# Warning! These functions will override original ones, if you don't want this behavior then comment out these four functions
+
+/**
+Summary: Format a LC array into UTF-8 encoded json data.
+
+Parameters:
+pArray (Array): The array to be formatted
+pForceRootType (String): The type to force values to.
+pPretty (Boolean): Set to true to format the resulting JSON data nicely.
+
+Returns (String): JSON data.
+
+Synonyms: JSONStringify
+
+Description:
+Format a LC array into UTF-8 encoded json data.
+
+Tags: JSON
+
+*/
 function ArrayToJSON pArray, pForceRootType, pPretty
    return JSONStringify(pArray, pForceRootType, pPretty)
 end ArrayToJSON
 
-function JSONToArray pJSON
-   return JSONParser(pJSON)
+
+
+/**
+Summary: Parse JSON text into a LiveCode array.
+
+Parameters:
+pJsonString (string): String containing UTF-8 encoded JSON text
+
+Returns: A LiveCode array (Array).
+
+Synonyms: JSONParser, arrayFromJson
+
+Description:
+<JSONParser> is used to convert data encoded in JSON format into a LiveCode
+array. It parses <pJsonString> and returns resulting array.
+
+Tags: JSON
+*/
+function JSONToArray pJsonString
+   return JSONParser(pJsonString)
 end JSONToArray
 
-function arrayFromJson pJSON
-   return JSONParser(pJSON)
+/**
+Summary: Parse JSON text into a LiveCode array.
+
+Parameters:
+pJsonString (string): String containing UTF-8 encoded JSON text
+
+Returns: A LiveCode array (Array).
+
+Synonyms: JSONParser, JSONToArray
+
+Description:
+<arrayFromJson> is used to convert data encoded in JSON format into a LiveCode
+array. It parses <pJsonString> and returns resulting array.
+
+Tags: JSON
+*/
+function arrayFromJson pJsonString
+   return JSONParser(pJsonString)
 end arrayFromJson
 
+
+/**
+Summary: Format a LC array into UTF-8 encoded json data.
+
+Parameters:
+pArray (Array): The array to be formatted
+
+Returns (String): JSON data.
+
+Description:
+Format a LC array into UTF-8 encoded json data.
+
+Tags: JSON
+
+*/
 function jsonFromArray pArray
    return JSONStringify(pArray)
 end jsonFromArray
 
-------------------------------------------------------------------------------------
------------------------------- CODE OF LIBRARY -------------------------------
-------------------------------------------------------------------------------------
 
-# validateJSON: Validate if a string is a valid JSON.
-# Parameter: The UTF-8 JSON to evaluate. (String)
-# returns: A boolean. (Boolean)
+/* CORE DECLARATIONS */
 
+/**
+Summary: Validate if a string is a valid JSON.
+
+Parameters:
+pJsonString (String): The UTF-8 encoded JSON data to be verified.
+
+Returns (Boolean): A boolean.
+
+Description:
+Validate if a string is a valid JSON.
+
+Tags: JSON
+*/
 function validateJSON pJsonString
    local tCont = 0, tTokenCont = 0, tSplit
 
@@ -121,10 +221,19 @@ function validateJSON pJsonString
 end validateJSON
 
 
-# beautifyJSON: JSON string formatted in a more visually pleasing way.
-# Parameter:
-# 1: UTF-8 JSON string (String)
-# returns: UTF-8 JSON string (String)
+/**
+Summary: JSON string formatted in a more visually pleasing way.
+
+Parameters:
+pJsonString (String): The UTF-8 encoded JSON data to be beautify.
+
+Returns (String): UTF-8 JSON string.
+
+Description:
+JSON string formatted in a more visually pleasing way.
+
+Tags: JSON
+*/
 function beautifyJSON pJsonString, pIndentSize
    if pIndentSize is an integer then put pIndentSize into sIndentSize
    else put 2 into sIndentSize
@@ -137,10 +246,20 @@ function beautifyJSON pJsonString, pIndentSize
 end beautifyJSON
 
 
-# minifyJSON: Remove unnecessary spaces from JSON string.
-# Parameter:
-# 1:  UTF-8 JSON string (String)
-# returns: JSON string (String)
+
+/**
+Summary: Remove unnecessary spaces from JSON string.
+
+Parameters:
+pJsonString (String): The UTF-8 encoded JSON data to be minified.
+
+Returns (String): Minified JSON data.
+
+Description:
+Remove unnecessary characters from JSON data.
+
+Tags: JSON
+*/
 function minifyJSON pJsonString
    local tFormatted, tPrevToken = "", tIndex = 0, tOpenClose = "", tItems = "", tHyphenMinus = false
 
@@ -191,12 +310,22 @@ end minifyJSON
 
 
 
-# JSONStringify: Gets the JSON string from an LC Array.
-# Parameter:
-# 1: LC Array (Array)
-# 2: Forcer root type
-# 3: if JSON is formatted nice (Boolean)
-# returns: JSON string (String)
+/**
+Summary: Format a LC array into UTF-8 encoded json data.
+
+Parameters:
+pArray (Array): The array to be formatted
+pForceRootType (String): The type to force values to.
+pPretty (Boolean): Set to true to format the resulting JSON data nicely.
+
+Returns (String): JSON data.
+
+Description:
+Format a LC array into UTF-8 encoded json data.
+
+Tags: JSON
+
+*/
 function JSONStringify pArray, pForceRootType, pPretty
    local tJsonString = "[", tIsNumeric = true, tKeys = "", tEndChar = "]"
 
@@ -297,10 +426,23 @@ function JSONStringify pArray, pForceRootType, pPretty
 end JSONStringify
 
 
-# JSONParser: Gets the LC Array of a UTF-8 JSON string
-# Parameter:
-# 1: UTF-8 JSON string (String)
-# returns: LC Array (Array)
+
+/**
+Summary: Parse JSON text into a LiveCode array.
+
+Parameters:
+pJsonString (string): String containing UTF-8 encoded JSON text
+
+Returns: A LiveCode array (Array).
+
+Synonyms: JSONToArray, arrayFromJson
+
+Description:
+<JSONParser> is used to convert data encoded in JSON format into a LiveCode
+array. It parses <pJsonString> and returns resulting array.
+
+Tags: JSON
+*/
 function JSONParser pJsonString
    local tKeyNameOrValue = 0, tArrayKeysPath, tNumKeys = 0, tOpenJArray, tResultArray, tHyphenMinus, tToken, tOldToken, tObjEmpty
 
