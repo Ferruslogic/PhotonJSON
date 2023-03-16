@@ -1,0 +1,18 @@
+[{
+    "orders": [{
+            "currency": "pounds",
+            "book": "Walking in Scotland",
+            "payments": [10.0]
+        },
+        {
+            "currency": "pounds",
+            "book": "Walking in Scotland",
+            "payments": [10.0]
+        }
+    ],
+    "address": {
+        "last_name": "Smith",
+        "country": "Scotland",
+        "first_name": "John"
+    }
+}]
