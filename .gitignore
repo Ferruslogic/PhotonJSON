@@ -1,0 +1,6 @@
+# These extensions are ignored as these files are generated when building the widgets.
+*.lcdoc
+*.xml
+*.lci
+*.lcm
+*.lce
