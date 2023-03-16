@@ -45,7 +45,6 @@ PhotonJSON has 5 functions and a public property that is, they can be accessed f
 
 | Name          | Type     | Parameter                                                    | Returns           | Description                                 |
 | :------------ | -------- | ------------------------------------------------------------ | ----------------- | ------------------------------------------- |
-| cVersion      | property |                                                              | Version           | The current version of the library.         |
 | validateJSON  | function | UTF-8 JSON string                                            | Boolean           | Validate if a string is a valid JSON.       |
 | minifyJSON    | function | UTF-8 JSON string                                            | UTF-8 JSON string | Remove unnecessary spaces from JSON string. |
 | beautifyJSON  | function | J UTF-8 JSON string                                          | UTF-8 JSON string | JSON string formatted in a more visually pleasing way. |
