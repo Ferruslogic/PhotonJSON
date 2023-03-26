@@ -1,5 +1,5 @@
 [![Donate](https://img.shields.io/badge/Donate-QvaPay-green.svg)](https://qvapay.com/payme/ferruslogic?r_id=PhotonJSON&msg=Donate%20to%20Ferruslogic)
-# PhotonJSON
+# PhotonJSON: Biblioteca JSON para el lenguaje de programación Livecode
 [Reading in English](README.md)
 
 Biblioteca de LiveCode scripts para trabajar con JSON, escrito en livecode-script y sin el uso de externos.
