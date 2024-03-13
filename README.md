@@ -66,4 +66,4 @@ If you don't want PhotonJSON to overwrite the previous functions, just comment t
 
 
 
-### Copyright (C)  2020  [FerrusLogic](https://ferruslogic.com/)
+### Copyright (C)  2020  FerrusLogic
