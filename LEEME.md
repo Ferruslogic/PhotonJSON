@@ -57,5 +57,5 @@ Si no desea que PhotonJSON sobrescriba las funciones anteriores, simplemente com
 >
 > *Creamos esta librería para ser utilizada en un plugin que se integraré con el IDE de LiveCode y como aclaramos en la nota. Cuando se llama a una función y está en dos bibliotecas, la primera de la ruta tendrá prioridad sobre las demás. Entonces, para no interferir con otros proyectos en los que no desea usar esta biblioteca, decidimos usar esta convención de nomenclatura y no incluir las demás.*
 
-### Copyright (C) 2020 [FerrusLogic S.A.](https://ferruslogic.com/)
+### Copyright (C) 2020 FerrusLogic S.A.
 
