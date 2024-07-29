@@ -60,8 +60,9 @@ ArrayToJSON(), JsonToArray(), arrayFromJson(), and jsonFromArray().
 If you don't want PhotonJSON to overwrite the previous functions, just comment the code for it in the PhotonJSON library.
 
 
-
->**Why don't we use these names for the library and use JSONStringify and JSONParser as in the HTML5 API.**
+> [!IMPORTANT]
+>**Why don't we use these names for the library and use `JSONStringify` and `JSONParser` as in the HTML5 API.**
+> 
 >*Since we created this library to be used in a plugin that will be integrated with the LiveCode IDE and as we clarify in the note. When a function is called and it is in two libraries, the first one in the path will take precedence over the others. So in order not to interfere with other projects where you don't want to use this library, we decided to use this naming convention and not include the others.*
 
 
