@@ -29,5 +29,3 @@ prebuilt/versions/* text eol=CRLF
 *.jepg binary
 *.rev binary
 *.livecode binary
-*.ac binary
-*.vc binary
