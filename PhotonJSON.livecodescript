@@ -1,7 +1,7 @@
 ﻿script "community.ferruslogic.library.photonjson"
 /*
-Code repository: https://github.com/Ferruslogic/PhotonJSON/
-Web: https://ferruslogic.com/
+Code repository: https://github.com/DTByte-Ltd/PhotonJSON
+Web: https://dtbyte.com/
 License: https://opensource.org/licenses/MIT
 Date: Nov 2020
 Last Update: October 19, 2025
@@ -13,7 +13,7 @@ in https://www.json.org/json-en.html
 Type: library
 Title: PhotonJSON
 Version: 1.2.5
-Author: FerrusLogic
+Author: DTByte-Ltd
 SVGIcon: M173.17275,101.24755c-0.31882,-0.37688 -0.63584,-0.75556 -0.97189,-1.15557c0.11837,-0.24671 0.14286,-0.33878 0.19637,
 -0.40817c0.28617,-0.35193 0.57869,-0.69842 0.87121,-1.04491c2.99006,-3.53791 5.74791,-7.24499 8.1747,-11.19333c2.57237,
 -4.18554 4.75153,-8.56019 6.24089,-13.25277c1.54968,-4.88305 2.38824,-9.85227 1.81499,-15.00472c-0.66078,-5.93613 -3.11478,
