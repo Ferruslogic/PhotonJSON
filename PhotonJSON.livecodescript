@@ -1,10 +1,10 @@
 ﻿script "community.ferruslogic.library.photonjson"
 /*
-Code repository: https://github.com/Ferruslogic/PhotonJSON/
-Web: https://ferruslogic.com/
+Code repository: https://github.com/DTByte-Ltd/PhotonJSON
+Web: https://dtbyte.com/
 License: https://opensource.org/licenses/MIT
 Date: Nov 2020
-Last Update: March 16, 2023
+Last Update: October 19, 2025
 Note: PhotonJSON follows JSON's standards presented
 in https://www.json.org/json-en.html
 */
@@ -13,7 +13,7 @@ in https://www.json.org/json-en.html
 Type: library
 Title: PhotonJSON
 Version: 1.2.5
-Author: FerrusLogic
+Author: DTByte-Ltd
 SVGIcon: M173.17275,101.24755c-0.31882,-0.37688 -0.63584,-0.75556 -0.97189,-1.15557c0.11837,-0.24671 0.14286,-0.33878 0.19637,
 -0.40817c0.28617,-0.35193 0.57869,-0.69842 0.87121,-1.04491c2.99006,-3.53791 5.74791,-7.24499 8.1747,-11.19333c2.57237,
 -4.18554 4.75153,-8.56019 6.24089,-13.25277c1.54968,-4.88305 2.38824,-9.85227 1.81499,-15.00472c-0.66078,-5.93613 -3.11478,
@@ -427,68 +427,20 @@ function JSONStringify pArray, pForceRootType, pPretty
    if pArray is not an array then return "{}"
 
    # The array's keys are all *numerical*, so the root element will be a JSON *array*
-   repeat for each key k in pArray
-      if k is not an integer then
-         put false into tIsNumeric
-         put "{" into tJsonString
-         put "}" into tEndChar
-         exit repeat
-      end if
-   end repeat
-
-   set the caseSensitive to true
-
-   # The values of the JSON keys will be formatted to their type.
-   if pForceRootType is "string" then
-
-      repeat for each key k in pArray
-         if pArray[k] is an array then
-
-            if tIsNumeric then
-               put (JSONStringify(pArray[k], "string", pPretty)) & comma after tJsonString
-               next repeat
-
-            else
-               put _jsonString(k) & ": " &(JSONStringify(pArray[k], "string", pPretty)) & comma after tJsonString
-               next repeat
-            end if
-
-         else if tIsNumeric then
-            put _jsonString(pArray[k]) & comma after tJsonString
-            next repeat
-
-         else
-            put _jsonString(k) & ": " & _jsonString(pArray[k]) & comma after tJsonString
-            next repeat
-
-         end if
-      end repeat
-
-   else
-
-      repeat for each key k in pArray
-         if pArray[k] is an array then
-
-            if tIsNumeric then
-               put (JSONStringify(pArray[k])) & comma after tJsonString
-               next repeat
-            else
-               put _jsonString(k) & ": " &(JSONStringify(pArray[k])) & comma after tJsonString
-               next repeat
-            end if
-
-         else if tIsNumeric then
-            put _jsonValue(pArray[k]) & comma after tJsonString
-            next repeat
-
-         else
-            put _jsonString(k) & ": " & _jsonValue(pArray[k]) & comma after tJsonString
-            next repeat
-         end if
-      end repeat
-
+   if the extents of pArray is not a point then
+      put false into tIsNumeric
+      put "{" into tJsonString
+      put "}" into tEndChar
    end if
-
+   
+   set the caseSensitive to true
+   
+   local tOptions
+   put pForceRootType into tOptions["string"]
+   put pPretty into tOptions["pretty"]
+   # The values of the JSON keys will be formatted to their type.
+   _builderJSON pArray, tIsNumeric, tOptions, tJsonString
+   
    put tEndChar into the char - 1 of tJsonString
 
    # Empty array and empty objects
@@ -513,7 +465,6 @@ function JSONStringify pArray, pForceRootType, pPretty
       # Pretty
       if pPretty then return _jsonPrettyCompact(tJsonString, 2, pForceRootType)
    end if
-
 
    return tJsonString
 end JSONStringify
@@ -558,7 +509,6 @@ function JSONParser pJsonString
       return empty
    end if
 
-
    repeat for each token tToken in pJsonString
       if tNumKeys < 0 then put 0 into tNumKeys
 
@@ -567,7 +517,6 @@ function JSONParser pJsonString
             put 0 into tKeyNameOrValue
             put tToken into tOldToken
             next repeat
-            break
 
          case "["
             add 1 to tNumKeys
@@ -576,7 +525,6 @@ function JSONParser pJsonString
             put tNumKeys into tOpenJArray[tNumKeys]
             put tToken into tOldToken
             next repeat
-            break
 
          case "}"
             # Fix bug when JSON has empty objects
@@ -591,7 +539,6 @@ function JSONParser pJsonString
             subtract 1 from tNumKeys
             put tToken into tOldToken
             next repeat
-            break
 
          case comma
             if tOpenJArray[tNumKeys] <> empty then
@@ -607,13 +554,11 @@ function JSONParser pJsonString
 
             put tToken into tOldToken
             next repeat
-            break
 
          case colon
             put 1 into tKeyNameOrValue
             put tToken into tOldToken
             next repeat
-            break
 
          case "]"
             delete variable tArrayKeysPath[tNumKeys]
@@ -630,14 +575,11 @@ function JSONParser pJsonString
 
             put tToken into tOldToken
             next repeat
-            break
 
          case "-"
             put true into tHyphenMinus
             put tToken into tOldToken
             next repeat
-            break
-
       end switch
 
       if backslash is in tToken then
@@ -662,7 +604,6 @@ function JSONParser pJsonString
       put empty into tOldToken
 
       if tKeyNameOrValue = 1 then
-
          if tHyphenMinus then
             put "-" & tToken into tToken
             put false into tHyphenMinus
@@ -683,6 +624,43 @@ function JSONParser pJsonString
    return tResultArray
 end JSONParser
 
+private command _builderJSON pArray, pIsNumeric, pOptions, @xJsonString
+   local tString, tPretty
+   if pOptions["string"] is "string" then
+      put "string" into tString
+   else
+      put "" into tString
+   end if
+
+   put pOptions["pretty"] is true into tPretty
+
+   local tValue
+   if pIsNumeric then
+      repeat for each element e in pArray
+         if e is an array then
+            put JSONStringify(e, tString, tPretty) & comma after xJsonString
+         else 
+            put _jsonValue(e) into tValue
+            if tString is "string" then
+               put quote & tValue & quote into tValue
+            end if
+            put tValue & comma after xJsonString
+         end if
+      end repeat
+   else
+      repeat for each key k in pArray
+         if pArray[k] is an array then
+            put _jsonString(k) & ": " &JSONStringify(pArray[k], tString, tPretty) & comma after xJsonString
+         else
+            put _jsonValue(pArray[k]) into tValue
+            if tString is "string" then
+               put quote & tValue & quote into tValue
+            end if            
+            put _jsonString(k) & ": " & tValue & comma after xJsonString
+         end if
+      end repeat
+   end if
+end _builderJSON
 
 private function _jsonString pValue
    if pValue is not an ascii string then put textEncode(pValue, "UTF-8") into pValue
@@ -973,4 +951,3 @@ private function _convertAsciiToUnicodeNum pNum
          break
    end switch
 end _convertAsciiToUnicodeNum
-
